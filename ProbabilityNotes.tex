@@ -1,0 +1,2160 @@
+\documentclass[12pt, twoside, draft]{article}
+
+\usepackage{graphicx}
+\usepackage{amsmath, amsthm, amsfonts}
+\usepackage[numbers]{natbib}
+\usepackage{algorithm, algorithmic}
+\usepackage{placeins}
+\usepackage{rotating}
+\usepackage{booktabs}
+\usepackage{multirow} 
+\usepackage[font=small,labelfont=bf,tableposition=top]{caption}
+\usepackage{xfrac}
+\usepackage{relsize}
+\usepackage{mathrsfs}
+\usepackage{enumitem}
+\usepackage{mathtools}
+\setcounter{secnumdepth}{5}
+\usepackage{lineno}
+\usepackage{bm}
+
+\usepackage[text={16cm,23cm},centering]{geometry}
+
+\setlength{\parskip}{1.2ex}
+\setlength{\parindent}{0em}
+\clubpenalty = 100
+\widowpenalty = 100
+\renewcommand{\baselinestretch}{1.0}
+
+\newcommand*{\red}{\textcolor{red}}
+\newcommand*{\green}{\textcolor{green}}
+\newcommand*{\blue}{\textcolor{blue}}
+
+\begin{document}
+
+\setpagewiselinenumbers
+
+%\modulolinenumbers[5]
+%\linenumbers
+
+\title{Probability Notes}
+
+\footnotesize\date{\today}
+
+\author{Mark DiBattista}
+%\\
+%\footnotesize \texttt{mtdibattista@gmail.com} \\ }
+
+\maketitle
+
+\begin{abstract}
+Probability theory is the primary mathematical basis for modeling uncertain physical phenomena and for establishing statistical claims.  These notes describe the theoretical setting, a few operational tools, and the common discrete and continuous distributions that form the basic theory, as well as introduce ideas in asymptotic limits, information and entropy, and Bayesian methods that comprise standard, more advanced tools for analysis.  Stress is placed on the linear algebraic structure of covariance matrices that partly define multivariate distributions.
+
+\end{abstract}
+%{\bf Keywords:} enter, keyword, here.
+
+%\tableofcontents
+
+\section{Suggested Resource Materials}
+Useful source texts:
+
+\begin{itemize}[noitemsep]
+\item Probability/Statistics, intermediate (probability sections are better than statistics):\hspace{50pt}
+\item[] \hspace{200pt} \textit{Statistical Inference}, Casella \& Berger
+\item Probability, advanced: \hspace{98pt} \textit{Probability and Measure}, Billingsley
+\end{itemize}
+
+Throughout the text the acronym, \textit{LAN}, refers to the companion writeup, \textit{Linear Algebra (Notes)}, from which information is referenced by chapter and/or numbered equation.  The acronym, \textit{SN}, refers to the writeup, \textit{Statistics (Notes)}.
+
+\section{Probability Preliminaries}\label{sec:probability_preliminaries}
+
+Practical concerns in probability -- those related to the calculation of probabilities and likelihoods that arise through models of physical phenomena --  are addressed completely through operations on density or cumulative functions defined over real-valued spaces.  For the purposes of compact presentation of mathematical relations, however, it is beneficial to ground the practical expressions in terms of an abstract theory, which covers the following notions:
+
+\begin{itemize}[noitemsep]
+\item An \textbf{abstract probability space}, within which a probability measure is defined over collections of events, 
+\item A \textbf{state space}, over which a probability density function captures the frequency at which events are mapped to real numbers, 
+\item A \textbf{random variable}, an invertible function that allows movement from one space to the other as necessary.  
+\end{itemize}
+
+The main element covered in the notes below is the mapping function -- the random variable -- that organizes events in the probability space into the indistiguishable collections assigned weights in the state space.  The main mathematical operation in probability is integration, here satisfied by the standard tools of Riemann theory.  Only a single exception below requires the finer tools of Lebesgue theory not covered in these notes -- the strong convergence of random variables, described below in $\S$\ref{sec:asymptotic_limits}.
+
+The material in this section provides more context than specific tools for calculation, but it is helpful to understand the setting within which random variables are defined.
+
+\subsection{Probability Spaces, State Spaces and Random Variables}\label{sec:random_variables}
+
+Probability theory models the results of physical processes as individual elements, known as \textbf{outcomes}, and quantifies carefully selected aggregations of outcomes, known as \textbf{events}, by assigning real values to each.  Both the collection of aggregations and assigned values are controlled, and must obey the following constraints:
+
+\begin{itemize}[noitemsep]
+\item All events are assigned values between zero and unity, inclusive;
+\item The event of no outcomes is assigned a value of zero; the event of all outcomes is assigned a value of unity;
+\item For each event the \textit{complement} aggregation -- all outcomes are assigned to one aggregation or the other -- is also an event;
+\item For two \textit{disjoint} events -- those that share no common outcome -- the aggregation of both collections of outcomes is an event, and the value assigned to the joint aggregation is the sum of the values assigned to each separately;
+\item For a \textit{countaby infinite} number of disjoint events, the \textit{limit} of the aggregation of  all collections is an event, and the value assigned to the joint aggregation is the \textit{limit} of the sum of the values assigned to each separately.
+\end{itemize}
+
+\subsubsection{Set Collections}\label{sec:set_collections}
+
+Within probability theory individual outcomes are taken as featureless points distinguished by name only, events are interpreted as formal sets of outcomes, and values are assigned by a set function that maps events to the unit interval.  The constraints on event formation, described in the itemized list above, is concisely expressed as the closure of a collection of sets, known as a $\boldsymbol{\sigma}$\textbf{-algebra}, under operations of complementation and countable union:
+
+\begin{equation}\label{eq:sigma-algebra}
+\mathcal{S} \text{ is a }\sigma \text{-algebra} \Rightarrow
+\begin{cases}
+\emptyset \in \mathcal{S} \\
+A \in \mathcal{S} \Rightarrow A^{\mathsf{c}} \in \mathcal{S} \\
+A_{n\in \mathbb{N}} \in \mathcal{S} \Rightarrow \bigcup_{n\in \mathbb{N}}A_n \in \mathcal{S}
+\end{cases}.
+\end{equation}
+
+Notice that these rules imply that the $\sigma$-algebra is closed under countable intersection as well: 
+
+\begin{equation}
+A_{n\in\mathbb{N}} \in \mathcal{S} \Rightarrow A_{n\in\mathbb{N}}^{\mathsf{c}} \Rightarrow \bigcup_{n\in \mathbb{N}} A^{\mathsf{c}}_n \in \mathcal{S} \Rightarrow \bigcap_{n\in \mathbb{N}} A_n \in \mathcal{S},
+\end{equation}
+
+since the complementation of countable union is countable intersection.
+
+By the nature of inclusion and closure defined in (\ref{eq:sigma-algebra}), if events are organized into two distinct $\sigma$-algebras, then one must include the other.  For a given collection of sets, $\mathcal{A}$, many $\sigma$-algebras may contain all its members, and the \textit{smallest} $\sigma$-algebra that contains $\mathcal{A}$, formed from the intersection of all such $\sigma$-algebras, is indicated by $\sigma(\mathcal{A})$.  In other words, if the full list of events is \textit{partially} defined by inclusion in $\mathcal{A}$, the designation, $\sigma(\mathcal{A})$, specifies the smallest collection of \textit{all consistent} events.
+
+\subsubsection{Set Functions}\label{sec:set_functions}
+
+Within probability theory the values assigned to events must never decrease with respect to increasing combination of events.  The constraints on set measures, described in the itemized list above, is captured by the requirements of a \textbf{subadditive measure}:
+
+\begin{equation}\label{eq:subadditive_measure}
+\mathbb{P} \text{ is a subadditive measure} \Rightarrow
+\begin{cases}
+\mathbb{P}\emptyset = 0 \\
+A_1 \cap A_2 = \emptyset \Rightarrow \mathbb{P} (A_1 \cup A_2)= \mathbb{P}A_1 + \mathbb{P}A_2 \\
+A_i \cap A_j = \emptyset, i \neq j \in \mathbb{N} \Rightarrow \mathbb{P}(\bigcup_{n\in\mathbb{N}}) = \sum_{n\in\mathbb{N}} \mathbb{P}A_n
+\end{cases}.
+\end{equation}
+
+The specification of \textit{sub}additivity comes from the application of the measure function to arbitrary sets: 
+\begin{multline}
+\mathbb{P}(A \cup B) = \mathbb{P} ((A - B) \cup (B - A) \cup (A\cap B)) \\
+\leq \mathbb{P}((A - B) \cup (A \cap B)) + \mathbb{P}((B - A) \cup (A \cap B)) = \mathbb{P}A + \mathbb{P}B, 
+\end{multline}
+
+which provides an alternative basis for the definition.
+
+\subsubsection{Measurability of Sets and Functions}
+
+The definitions of $\sigma$-algebra in $\S$\ref{sec:set_collections} and subadditive measure in $\S$\ref{sec:set_functions} are joined in the notion of \textbf{measurability}.  Indeed, for a given universe of all outcomes, $\Omega$, the set of all events, $\mathcal{F}$, and a subadditive set function, $\mathbb{P}$, we have the definitions,
+
+\begin{equation}
+\begin{rcases}
+\text{A universe of elements, } \hspace{3pt} \Omega\\
+\text{A } \sigma\text{-algebra of sets, } \hspace{18pt} \mathcal{F}
+\end{rcases} \hspace{10pt} A \in \mathcal{F} \Rightarrow A \subset \Omega\text{ then } \Omega \text{ is } \mathcal{F}\text{-measurable;}
+\end{equation}
+
+and
+
+\begin{equation}
+\begin{rcases}
+\text{A } \sigma\text{-algebra of sets, } \hspace{16pt} \mathcal{F} \\ 
+\text{A subadditive measure, } \mathbb{P}
+\end{rcases} \hspace{10pt} \mathbb{P}:\mathcal{F} \rightarrow [0,1] \text{ then } \mathcal{F} \text{ is } \mathbb{P}\text{-measurable.}
+\end{equation}
+
+Thus, measurability is a concept that applies in a closely coupled fashion to both collections of sets and to subadditive set functions.
+
+\subsubsection{Probability and State Spaces}
+
+A \textbf{Probability Space} is defined as a triple, 
+
+\begin{equation}
+\text {probability space } \rightarrow (\Omega, \mathcal{F}, \mathbb{P}), 
+\end{equation}
+
+consisting of the set of all outcomes, the set of all events and a set function that assigns each event a real value in the unit interval.  In particular, the set of all events is a $\sigma$-algebra, and the set function is a \textbf{probability measure}, which in addition to the requirements of subadditivity listed in (\ref{eq:subadditive_measure}), is bounded by unity:
+
+\begin{equation}
+ A \subset \Omega \Rightarrow 0 = \mathbb{P}\emptyset  \leq \mathbb{P}A  \leq  \mathbb{P}\Omega = 1.
+\end{equation}
+
+The key point is that the set of all outcomes, the set of all events, and the probability measure are linked by measurability, and the arrangment is sufficiently flexible to model the effects of chained `and' and `or' conditions on probabilistic statements (as well as the convergence properties of countably infinite may such statements), while also sufficiently restrictive to prevent the application to sets to which consistent probability values cannot be assigned, and cannot arise as natural problems of physical origin.  The properties of the probability triple are summarized in the table:
+
+\begin{align}
+\text{Set of all outcomes, } \hspace{17pt} \Omega && \text{Individual outcome, } \hspace{20pt} \omega && \Omega = \{\omega_{\lambda \in \Lambda} \} \hspace{7pt} \\
+\sigma \text{-algebra of all events, } \mathcal{F} && \text{Individual event, } \hspace{11pt} A \subset \Omega
+&&  \mathcal{F} = \{A_{\lambda \in \Lambda} \} \hspace{4pt} \\
+&& \Omega \text{ is-}\mathcal{F}\text{-measurable} \hspace{35pt}&& \notag \\
+\text{Probability measure, } \hspace{13pt} \mathbb{P} && \mathcal{F} \text{ is }  \mathbb{P} \text{-measurable}\hspace{34pt} && \mathbb{P}: \mathcal{F} \rightarrow [0,1]
+\end{align}
+
+The index and index set, $\lambda$ and $\Lambda$, respectively, in the table reference (possibly) uncountably infinite members in both the sets of outcomes and events.
+
+Although a probability space provides a rigorous structure for modeling uncertainty in physical problems, it is unwieldy for performing calculations to address specific questions on probabilities of outcomes, many of which are indifferent to the detailed, computationally indistinguishable combinations of outcomes.  The associated \textbf{State Space} is a kind of probability triple introduced to satisfy this,
+
+\begin{equation}
+\text{state space } \rightarrow (\mathbb{R}, \mathcal{B}, \mu).
+\end{equation}
+
+Here, the  universe of outcomes is taken as the real number line, $\mathbb{R}$, whose elements are collected into \textbf{Borel sets}, which are contained within the $\sigma$-algebra of events generated by the set of real intervals with rational endpoints -- a countable set denoted as $\mathcal{J}$ :
+
+\begin{equation}
+\mathcal{B} = \sigma(\mathcal{J}).
+\end{equation}
+
+Finally, the set functions, $\mathbb{P}$ and $\mu$, are both probability measures.
+
+\subsubsection{Random Variables}\label{sec:random_variables}
+
+The probability space and the state space, which serve as kinds of abstract and realized domains of chance phenomena, are linked through a mapping, $X$, known as a \textbf{random variable},
+
+\begin{equation}\label{eq:random_variable}
+X:\Omega \rightarrow \mathbb{R} \hspace{10pt}
+\begin{cases}
+\text{Realization of the random variable: }\hspace{79pt} \omega \in \Omega \Rightarrow X(\omega) = x \\
+\text{Borel sets pull back to measurable collections of events: }  \hspace{15pt} X^{-1}: \mathcal{B} \rightarrow \mathcal{F} \\
+\text{The probability `law of X': } \hspace{33pt} 
+\begin{rcases}
+\mu_X : \mathcal{B} \rightarrow [0,1] \\
+B \in \mathcal{B} 
+\end{rcases} \Rightarrow \mu_X B = \mathbb{P}_X X^{-1} B
+\end{cases}
+\end{equation}
+
+The key point is the random variable, $X$, maps events in the probability space into events in the state space, and the values of the respective probability measures are identical for all events.  The probability space is the more natural space to pose questions, the state space is the more natural to derive numerical results, and the random variable ensures that the two domains are consistently aligned in all cases.
+
+Also note the slight change in symbol for the probability e measure, which has taken a subscript, $\mathbb{P}_X$.  This is intended to indicate that the probability measure is restricted to sets in the probability space that are pulled back from Borel sets in the state space, as defined through the mapping, $X$.
+
+\subsubsection{The Probability Density and Cumulative Distribution Functions}
+The probability measure induced by the random variable, $X$, is expressed as a \textbf{cumulative distribution function}, $F_X$, which is the value assigned to the infinite half-open interval:
+
+\begin{equation}
+\begin{rcases}
+B = [-\infty, x) \\
+A = X^{-1}B = \{\omega: X(\omega) < x \} \\
+\end{rcases} \Rightarrow
+\mathbb{P}_X A = \mu_X B \equiv F_X(x)
+\end{equation}
+
+Applying the fundamental theorem of calculus, we can derive an equivalent expression in terms of a related \textbf{probability density function}, $p(x)$.  The two functions are related by the standard operations,
+
+\begin{align}
+\textbf{Probability density function: } && p(x) = \frac{d}{dx} F(x) \hspace{21pt} \\
+\textbf{Cumulative distribution function: } && F(x) = \int_{-\infty}^x p(x) \,dx
+\end{align}
+
+As a practical matter, `probability distributions' are specified by attaching the random variable, $X$, to a formula for the probability density or cumulative distribution function.
+
+\subsubsection{Joint Random Variables and Random Vectors}\label{sec:joint_random_variables}
+The abstract presentation provided above in $\S$\ref{sec:random_variables} covers a single-dimensional map, $X:\Omega \rightarrow \mathbb{R}$.  It is straightforward to extend this formulation to cover multidimensional versions as well. By defining 
+\begin{align}
+\text{random vector: } & \mathbf{X} = \left(X_1, \cdots, X_n \right) \\
+\text{multidimensional Borel set: } & \mathbf{B}^n = (\mathcal{B}_1, \cdots, \mathcal{B}_n) \in \mathcal{B}^n
+\end{align}
+we can generate the multidimensional version of (\ref{eq:random_variable}) as
+
+\begin{equation}\label{eq:random_vector}
+\mathbf{X}:\Omega \rightarrow \mathbb{R}^n \hspace{10pt}
+\begin{cases}
+\text{Realization of the random vector: }\hspace{90pt} \omega \in \Omega \Rightarrow \mathbf{X}(\omega) = \mathbf{x} \\
+\text{Borel sets pull back to measurable collections of events: }  \hspace{15pt} \mathbf{X}^{-1}: \mathcal{B}^n \rightarrow \mathcal{F} \\
+\text{The probability `law of \textbf{X}': } \hspace{34pt} 
+\begin{rcases}
+\mu_{\mathbf{X}} : \mathcal{B}^n \rightarrow [0,1] \\
+\mathbf{B} \in \mathcal{B}^n 
+\end{rcases} \Rightarrow \mu_\mathbf{X} \mathbf{B} = \mathbb{P}_\mathbf{X} \mathbf{X}^{-1} \mathbf{B}
+\end{cases}
+\end{equation}
+
+Defining the multi-dimensional half intervals, and the associated probability measures
+
+\begin{equation}
+\begin{rcases}
+\mathbf{B} = ([-\infty, x_1), \cdots, [-\infty, x_n)) \\
+A = \mathbf{X}^{-1}\mathbf{B} = \{\omega: (X_1(\omega) < x_1, \cdots, X_n(\omega) < x_n) \} \\
+\end{rcases} \Rightarrow
+\mathbb{P}_{\mathbf{X}} A = \mu_{\mathbf{X}} \mathbf{B} \equiv F_{\mathbf{X}}(\mathbf{x})
+\end{equation}
+
+the cumulative and density functions are expressed as
+
+\begin{align}
+\textbf{Probability density function: } & p(\mathbf{x}) \equiv p(x_1, \cdots, x_n) = \frac{\partial^n}{\partial x_1 \cdots \partial x_n} F(x_1, \cdots, x_n) \\
+\textbf{Cumulative distribution function: } & F(\mathbf{x}) = \int_{-\infty}^{x_1} \cdots \int_{-\infty}^{x_n} p(x_1, \cdots, x_n) \,dx_1 \cdots dx_n
+\end{align}
+
+The random vector is a model for joint distributions over finite-dimensional spaces.  Usually, if the sequence of random variables is important -- as it is for a sample distribution -- the joint distribution is writte as a tuple with variables expressed as coordinates.  If the sequence is not important, then the variables are expressed with different characters without enclosing parentheses: $X, Y$ vs. $(X_1, X_2)$.  The mathematical operations for these two interpretations are identical. 
+
+ For the case in which the random vector is indexed by an \textit{uncountable continuum} of values, $0 \leq t \leq \infty$, for example, the object is termed a \textbf{random process}, a topic that is covered in a companion set of notes.
+
+\subsubsection{Independent Joint Distributions}\label{sec:independent_joint_distributions}
+
+A bivariate distribution of random variables, $X$ and $Y$, is \textbf{independent} if the joint probability densities factor,
+\begin{equation}\label{eq:independent_density_function}
+p_{X,Y}(x,y) = p_X(x)p_Y(y).
+\end{equation}
+
+This definition can be extended to cover multivariate distribution of arbitrary random variables, represented as the sequence, $\mathbf{X} = \left(X_1 , \cdots, X_n\right)$, with independence defined through
+\begin{equation}
+p_{\mathbf{X}} (\mathbf{x}) = \prod_{i=1}^n p_{X_i}(x_i).
+\end{equation}
+
+As a special case a multivariate distribution is \textbf{independent identically distributed (IID)} provided that the coordinates of the random vector are distributed by a \textit{common} random variable,
+\begin{equation}
+X_1, \ldots, X_n \sim X \Rightarrow p_{\mathbf{X}} (\mathbf{x}) = \prod_{i=1}^n p_{X}(x_i)
+\end{equation}
+
+\subsubsection{Joint, Conditional and Marginal Distributions}\label{sec:joint_conditional_marginal_distributions}
+A multivariate joint distribution, independent or otherwise, can be factored into \textbf{marginal} and \textbf{conditional} distributions
+
+\begin{equation}
+\begin{rcases}
+\text{joint distribution: } \hspace{10pt} & p_{X,Y} (x,y) \\
+\text{marginal distribution: } \hspace{10pt} & p_Y(y) \\
+\text{conditional distribution: } \hspace{10pt} &  p_{X|Y}(x|y)
+\end{rcases} \Rightarrow
+p_{X,Y} (x,y) = p_{X|Y}(x|y) \, p_Y(y).
+\end{equation}
+
+It is frequently useful to express the conditional distribution in terms of the joint and marginal distributions,
+\begin{equation}
+p_{X|Y}(x|y) = \frac{p_{X,Y} (x,y)}{p_Y(y)}.
+\end{equation}
+
+Notice that independence in the random variables, $X$ and $Y$, by the factorization in (\ref{eq:independent_density_function}), requires that the conditional distribution coincide with the marginal distribution, since
+\begin{equation}
+p_{X|Y}(x|y) = \frac{p_{X,Y} (x,y)}{p_Y(y)} = \frac{p_X(x) \, p_Y(y)}{p_Y(y)} = p_X(x).
+\end{equation}
+
+
+Finally, since the conditional operation is symmetric in the random variables, $X$ and $Y$, we can rearrange the terms,
+\begin{equation}\label{eq:Bayes_theorem_density}
+p_{X|Y}(x|y) {p_Y(y)} = p_{X,Y} (x,y) = p_{Y|X}(y|x) {p_X(x)} \Rightarrow p_{X|Y}(x|y) =  \frac{ p_{Y|X}(y|x) {p_X(x)}}{p_Y(y)},
+\end{equation}
+for which the latter formation is known as \textbf{Bayes' Theorem} and is treated in greater detail below in $\S$\ref{sec:Bayesian_perspectives}. 
+
+\subsubsection{The Expectation Operator}\label{sec:expectation_operator}
+
+The main tool in probability theory is the \textbf{expection operator}, $\mathbb{E}$, which carries out integration of  constants, functions of the random variable, $X$, or functions of the probability measure, $\mathbb{P}_X$, taken over the entire probability space.  In all cases the integration over the probability space is equal to the integration of the random variable mapped into the state space, and weighted by the probability density function.  An arbitrary function of the random variable, for example, is expressed as
+
+\begin{equation}
+\mathbb{E}gX = \int_{-\infty}^{\infty}g(x) \, p_X(x)\,dx.
+\end{equation}
+
+In fact \textit{all} operations in this presentation can be expressed as applications of the expectation operator.  Note in particular that probability calculations can be expressed in terms of the expectation operator, since
+
+\begin{equation}
+1_A(\omega) = \begin{cases}
+1, \omega \in A \\
+0, \omega \notin A 
+\end{cases}
+\Rightarrow
+\mathbb{P}A = \mathbb{E}\,1_A,
+\end{equation}
+
+for which the operator, $1_A$, is the indicator function for the set, $A$.
+
+\section{Moments}\label{sec:moments}
+\subsection{Univariate}
+
+A (continuous) probability distribution is completely defined by its \textbf{moments}, which are integrations of  powers of the random variable,
+
+\begin{equation}
+\mathbb{E}X^n = \int_{-\infty}^\infty x^n \, p_X(x)\,dx.
+\end{equation}
+
+A common method of approximating probability distributions is to adjust parameters to match the measured values of the lower-order moments.  The first moment is known as the \textbf{mean} of the distribution, and is given by 
+
+\begin{equation}
+\mathbb{E}X \equiv \mu_X = \int_{-\infty}^\infty x\,p_X(x)\,dx.
+\end{equation}
+
+Note that the standard symbol for the mean, $\mu_X$, matches the form typically assigned to the probability measure in the state space.  It should be obvious from context which meaning is intended.
+
+Information about the shape of the distribution is also provided by the \textbf{central moments}, which are integrations of powers of the random variable shifted by the mean, 
+
+\begin{equation}
+\mathbb{E}(X - \mathbb{E}X)^n = \int_{-\infty}^\infty (x - \mu_X)^n \, p_X(x)\,dx.
+\end{equation}
+
+In particular the second central moment, also known as the \textbf{variance}, is used as a common measure of spread of a distribution,
+
+\begin{align}
+\mathbb{V}X \equiv \sigma_X^2 &= \mathbb{E}(X - \mathbb{E}X)^2 = \int_{-\infty}^\infty (x - \mu_X)^2 \, p(x)\,dx \\
+&= \mathbb{E}X^2 - (\mathbb{E}X)^2 = \int_{-\infty}^\infty x^2 \, p(x)\,dx - \mu_X^2
+\end{align}
+
+and the covariance of a joint distribution is used a common measure of coordination of variation,
+
+\begin{align}
+\mathbb{C}(X,Y \equiv \sigma_{XY} &= \mathbb{E}(X - \mathbb{E}X)(Y - \mathbb{E}Y)= \int_{-\infty}^\infty \int_{-\infty}^{\infty}  (x - \mu_X)(y - \mu_Y) \, p(x,y)\,dx\,dy \\
+&= \mathbb{E}XY - \mathbb{E}X\,\mathbb{E}Y= \int_{-\infty}^\infty \int_{-\infty}^\infty xy \, p(x,y)\,dx\,dy - \mu_X\mu_Y
+\end{align}
+
+\subsection{Multivariate Moments}
+
+The moments for multivariate probability distributions can be expressed in terms of vectors and operations on vectors of univariate random variables.  In particular the mean and covariance of the multivariate distribution take the form of a vector and matrix, respectively:
+
+\begin{equation}
+\mathbf{X} = \begin{pmatrix} X_1 \\ \vdots \\ X_n \end{pmatrix} \Rightarrow
+\begin{cases}
+\mathbb{E}\mathbf{X} &= \begin{pmatrix} \mathbb{E}X_1 \\ \vdots \\ \mathbb{E}X_n \end{pmatrix}    \\
+\\
+\mathbb{V}\mathbf{X} &= \mathbb{E}(\mathbf{X} - \mathbb{E}\mathbf{X})(\mathbf{X} - \mathbb{E}\mathbf{X})^\top = \mathbb{E}\mathbf{X} \mathbf{X}^\top - \mathbb{E}\mathbf{X} \, \mathbb{E}\mathbf{X}^\top \\
+&=\begin{pmatrix}
+\mathbb{V}X_1 & \cdots & \mathbb{C}(X_1, X_n) \\
+\vdots & \ddots & \vdots \\
+\mathbb{C}(X_n, X_1) & \cdots & \mathbb{V}X_n
+\end{pmatrix}
+\end{cases}
+\end{equation}
+
+Note in particular that the covariance matrix is written as the expectation of a random variable dyad (see LAN, $\S$3.3), and is generally full-rank, symmetric and positive definite.
+
+\subsection{Sample Mean and Variance}\label{sec:sample_mean_variance}
+\subsubsection{Single-Variate Points}\label{sec:sample_mean_variance_single-variate}
+Given a set of data points, $(x_1, \cdots, x_m)$, the sample mean and sample variance are given by
+\begin{align}
+\text{sample mean:} \hspace{10pt} & \bar{x} = \frac{1}{m} \sum_{i=1}^m x_i \label{eq:sample_mean}\\
+\text{sample variance:} \hspace{10pt} & s_x = \frac{1}{m} \sum_{i=1}^m (x_i - \bar{x})^2 = \frac{1}{m} \sum_{i=1}^m x^2_i - \bar{x}^2. \label{eq:sample_variance}
+\end{align}
+
+Representing the data points as a vector, $(x_1, \cdots, x_m)^\top \equiv \mathbf{x}$, we can form the quantities,
+\begin{align}
+&\mathbf{x}^\top \mathbf{1}_m = m \bar{x}, \\
+&\mathbf{x}^\top \mathbf{1}_m (\mathbf{1}_m^\top \mathbf{1}_m)^{-1} \mathbf{1}_m^\top \mathbf{x} = \mathbf{x}^\top P_{\mathbf{1}_m} \mathbf{x} = m \bar{x}^2
+\end{align}
+for which the matrix, $ P_{\mathbf{1}_m}$, is a projection matrix (\textit{cf. LAN}, $\S$3.11) into the 1-dimensional subspace spanned by the ones vector.  The sample mean and sample variance can then be expressed as,
+\begin{align}
+\text{sample mean:} \hspace{10pt} & \bar{x} = \frac{1}{m} \mathbf{x}^\top \mathbf{1}_m \label{eq:sample_mean_single-variate} \\
+\text{sample variance:} \hspace{10pt} & s_x = \frac{1}{m}  \mathbf{x}^\top \mathbf{x} -  \frac{1}{m} \mathbf{x}^\top P_{\mathbf{1}_m} \mathbf{x} = \frac{1}{m} \mathbf{x}^\top (I_m -  P_{\mathbf{1}_m}) \mathbf{x} \label{eq:sample_variance_single-variate}.
+\end{align}
+
+Note that the sample mean and variance lie in orthogonal 1- and $(m-1)$-dimensional subspaces, respectively. 
+
+Also note that the normalizing factor for the sample variance -- here, the number of points, $m$ --  will be shown to yield a biased estimator for variance that maximizes entropy; an unbiased estimator is achieved by normalizing the sum by $(m-1)$.
+
+\subsubsection{Multivariate Points}\label{sec:sample_mean_variance_multivariate}
+For a set of multidimensional data points, $(\mathbf{x}_1, \cdots, \mathbf{x}_m)$, each taken from an $n$-dimensional space, we can arrange the information in matrix form so that each row contains a single data point,
+\begin{equation}
+X = \begin{pmatrix} x_{11} & \cdots & x_{1n} \\ \vdots & \ddots & \vdots \\ x_{m1} & \cdots & x_{mn} \end{pmatrix} = 
+\begin{pmatrix} \leftarrow &\mathbf{x}_1 & \rightarrow \\  & \vdots &  \\ \leftarrow & \mathbf{x}_m & \rightarrow \end{pmatrix} \equiv 
+\begin{pmatrix} \uparrow & & \uparrow \\ \mathbf{c}_1 & \cdots & \mathbf{c}_n \\ \downarrow & & \downarrow \end{pmatrix}.
+\end{equation}
+and the last equivalence stresses that the \textit{coordinates} are aligned in columns.  Notice also that the symbol, $X$, is a \textit{matrix}, not a random variable.  Using the sample mean and sample variance formulas in (\ref{eq:sample_mean}) and (\ref{eq:sample_variance}), and defining the $m$-dimensional ones vector, $\mathbf{1}_m = \begin{pmatrix} 1 & \cdots & 1 \end{pmatrix}^\top$, we can express the \textit{coordinate-wise} sample means and variances in terms of inner products (\textit{cf. LAN}, $\S$3.2),
+\begin{align}
+\text{coordinate sample mean:} \hspace{10pt} &\bar{x}_j = \frac{1}{m} \sum_{i=1}^m x_{ij} = \frac{1}{m} \mathbf{c}_i^\top \mathbf{1}_m \\
+\text{coordinate sample covariance:} \hspace{10pt} & s_{jk} = \frac{1}{m} \sum_{i=1}^m (x_{ij} - \bar{x}_j)(x_{ik} - \bar{x}_k) = \frac{1}{m} \mathbf{c}_i^\top \mathbf{c}_j - \bar{x}_i \bar{x}_j
+\end{align}
+
+Given the following matrix operations,
+\begin{align}
+&X^\top \mathbf{1}_m = m \begin{pmatrix} \bar{x}_1 \\ \vdots \\ \bar{x}_n \end{pmatrix}, \\
+&X^\top \mathbf{1}_m (\mathbf{1}_m^\top \mathbf{1}_m)^{-1} \mathbf{1}_m^\top X = X^\top P_{\mathbf{1}_m} X = m
+\begin{pmatrix}
+\bar{x}_1^2 & \cdots & \bar{x}_1 \bar{x}_n \\
+\vdots & \ddots & \vdots \\
+\bar{x}_n \bar{x}_1 & \cdots & \bar{x}_n^2
+\end{pmatrix},
+\end{align}
+for which the matrix, $ P_{\mathbf{1}_m}$, is a projection matrix (\textit{cf. LAN}, $\S$3.11).  The sample mean (vector) and sample variance (covariance matrix) can be expressed in vector and matrix form,
+\begin{align}
+\text{sample mean vector:} \hspace{10pt} & \bar{\mathbf{x}} = \frac{1}{m} X^\top \mathbf{1}_m \label{eq:sample_mean_vector} \\
+\text{sample covariance matrix:} \hspace{10pt} & S_X = \frac{1}{m}  X^\top X -  \frac{1}{m} X^\top P_{\mathbf{1}_m} X = \frac{1}{m} X^\top (I_m -  P_{\mathbf{1}_m}) X \label{eq:sample_covariance_vector}.
+\end{align}
+
+Notice that the information in the sample mean vector and sample covariance matrix lie in the ranges of the projection operators, $P_{\mathbf{1}_m}$ and $(I_m -  P_{\mathbf{1}_m})$, that are applied to $m \times n$ matrices, which are orthogonal $m$- and $m(n-1)$-dimensional subspaces, respectively.  
+
+\section{Common Inequalities}\label{sec:common_inequalities}
+Proofs of probabilistic claims frequently rely on well-established inequalities, especially when applied asymptotically.  A few of the most common are presented in the following subsections.
+
+\subsection{Cauchy-Schwarz Inequality}\label{sec:Cauchy-Schwarz_inequality}
+In linear algebra the \textbf{Cauchy-Schwarz Inequality} is a statement about inner products and vector norms, (\textit{cf. LAN}, $\S$3.5, (43)), so that given two vectors, $\mathbf{x}$ and $\mathbf{y}$, we have
+\begin{equation}
+|\langle \mathbf{x}, \mathbf{y} \rangle |^2 \leq \langle \mathbf{x}, \mathbf{x} \rangle \cdot \langle \mathbf{y}, \mathbf{y} \rangle.
+\end{equation}
+The probabilistic interpretation of the statement follows from the identification of an inner product with the expectation of the product of random variables,
+\begin{equation}
+\langle X,Y \rangle \equiv \mathbb{E}XY,
+\end{equation}
+for which the bilinear operation in finite dimensions is extended to cover integrable functions defined over the real number line, $\mathbb{R}$.  From this the inequality follows,
+\begin{equation}
+|\mathbb{E}XY|^2 \leq \mathbb{E}X^2 \cdot \mathbb{E}Y^2 \Rightarrow \mathbb{C}(X, Y) \leq \mathbb{V}X \cdot \mathbb{V}Y
+\end{equation}
+
+\subsection{Chebyshev's Inequality}\label{sec:Chebyshevs_inequality}
+Since the total weight of a probability distribution is unity, the density function for a random variable must asymptote to zero for large positive and negative values.  If, in addition the mean of the distribution is well-defined, it is possible to bound the weight in the tails of the distribution, not only for the random variable, $X$, but for arbitrary non-negative functions of the random variable, $g(X) \geq 0$, via \textbf{Chebyshev's Inequality},
+\begin{equation}
+\mathbb{P}\{g(X) \geq r\} \leq \frac{\mathbb{E}g(X)}{r}.
+\end{equation}
+
+This follows directly from simple properties of integrals, since
+\begin{equation}
+\mathbb{E}g(X) = \int_D g(x)f(x) \,dx \geq \int_{\{g(x) \geq r\}} g(x)f(x)\,dx \\ \geq r \int_{\{g(x) \geq r\}} f(x)\, dx = r \, \mathbb{P} \{g(X) \geq r\}.
+\end{equation}
+
+
+\subsection{Jensen's Inequality}\label{sec:Jensens_inequality}
+Given a random variable, $X$, and a \textit{convex} function, $\phi$, for which 
+\begin{equation}\label{eq:convex_function}
+\begin{rcases}
+x_1 \leq x_2 \\
+0 \leq t \leq 1
+\end{rcases} \Rightarrow \phi(tx_1 + (1-t)x_2) \leq t\phi(x_1) + (1-t)\phi(x_2),
+\end{equation}
+the relative magnitudes of the results of applying the expectation and function operators is given by \textbf{Jensen's Inequality},
+\begin{equation}
+\phi(\mathbb{E}X) \leq \mathbb{E}\phi(X).
+\end{equation}
+
+The conditions for convexity given in (\ref{eq:convex_function}) can be expressed globally as an inequality relation between a function and its tangent line at an arbitrary point, $x$, so that we have
+\begin{equation}\label{eq:convex_function_tangent}
+ax + b \leq \phi(x),
+\end{equation}
+for the appropriate values, $a$ and $b$.  If we choose the particular point, $x_0 = \mathbb{E}X$, then the inequality in (\ref{eq:convex_function_tangent}) leads to the relations,
+\begin{multline}
+\mathbb{E}\phi(X) = \int_\mathbb{R} \phi(x) p(x) \,dx \geq \int_\mathbb{R} (ax + b) p(x)\, dx = \\  a\int_\mathbb{R} xp(x)\,dx + b\int_\mathbb{R} p(x)\, dx = a x_0 + b = \phi(x_0) = \phi(\mathbb{E}X).
+\end{multline}
+
+\section{Operators}\label{sec:operators}
+All information in the random variable, $X$, is contained within the induced probability measure, $\mathbb{P}_X$.  Other formulations of the random variable, provided below in $\S\S$\ref{sec:moment-generating_functions} - \ref{sec:cumulants}, contain equivalent information, however, organized as countably-infinite applications of the expectation operator.  These alternative formulations form the basis of many proofs and demonstrations, in which a random variable is operated upon and the form of a new random variable is generated immediately or emerges asymptotically in the limit of infinite operations.
+
+\subsection{Exponentiated Operators}\label{sec:exponentiated_operators}
+There are a number of useful operations on random variables that can be expressed as power series with factorial weights.  This can be represented symbolically as an \textbf{exponentiated function},
+\begin{equation}
+X + \frac{X^2}{2!}+ \frac{X^3}{3!}+ \cdots = \sum_{n=1}^\infty \frac{X^n}{n!} \equiv e^{X},
+\end{equation}
+which is well-defined provided the moments exist.
+
+\subsubsection{Moment-Generating Functions}\label{sec:moment-generating_functions}
+The \textbf{moment-generating function} is the expectation of a parametrized exponentiated function of the random variable, $X$, defined as
+\begin{equation}\label{eq:moment_generating_function}
+M_X(t) \equiv \mathbb{E}e^{tX} = \sum_{n=1}^\infty \frac{\mathbb{E}X^n}{n!}t^n,
+\end{equation}
+which takes the form of a Taylor's series expanded about the origin.  The function receives its name from the term-by-term evaluation,
+\begin{equation}
+\mathbb{E}X^n = \left. \frac{d^n}{dt^n}M_X(t) \right|_{t=0} = M_X^{(n)}(0),
+\end{equation}
+for which the $n^{th}$ term in the series is the $n^{th}$ moment of the distribution.  Notice that the expression in (\ref{eq:moment_generating_function}) is the \textit{Laplace transform} of the random variable.
+
+The moment-generating function of a scaled random variable, $cX$, is identical to the moment-generating function with a scaled parameter,
+\begin{equation}
+M_{cX}(t) = \mathbb{E}e^{ctX} = M_X(ct)
+\end{equation}
+while the joint moment-generating function for \text{independent} random variables, $X$ and $Y$, (\textit{cf.} $\S$\ref{sec:independent_joint_distributions}), factors into the product of the marginal moment-generating functions,
+\begin{equation}\label{eq:joint_moment-generating_function}
+M_{X,Y}(s, t) = \mathbb{E}e^{sX+tY} = \mathbb{E}e^{sX}e^{tY} = \mathbb{E}e^{sX}\mathbb{E}e^{tY} = M_X(s)M_Y(t).
+\end{equation}
+The first equality in the chain in (\ref{eq:joint_moment-generating_function}) is the definition of joint moment-generating function; the third equality is due to independence (the factorability of the joint probability measures is factored into the product of marginals).  
+
+It can be proven that continuous probability distributions are uniquely specified by their moments.  It is therefore a common strategy to identify the probability distribution associated with a transformed random variable by recognizing the form of the transformed moment-generating function.
+
+\subsubsection{Characteristic Functions}\label{sec:characteristic_functions}
+The moment-generating function is the Laplace transform of the random variable; the \textbf{characteristic} function is the \textit{Fourier transform},
+\begin{equation}
+\phi_X(t) \equiv \mathbb{E}e^{itX}.
+\end{equation}
+The characteristic function is a \textit{globally} convergent series, unlike the moment-generating function.
+
+As with the moment-generating function, the characteristic function of a scaled random variable is the characteristic function of the scaled parameter,
+\begin{equation}
+\phi_{cX}(t) = \mathbb{E}e^{ictX} = \phi_X(ct)
+\end{equation}
+while for independent random variables, $X$ and $Y$, the joint characteristic function is factored into the product of marginals,
+\begin{equation}
+\phi_{X,Y}(s, t) = \mathbb{E}e^{i(sX+tY)} = \mathbb{E}e^{isX}e^{itY} = \mathbb{E}e^{isX}\mathbb{E}e^{itY} = \phi_X(s)\phi_Y(t).
+\end{equation}
+
+\subsubsection{Cumulants}\label{sec:cumulants}
+The logarithm of the moment-generating function, called the \textbf{cumulant} function,
+\begin{equation}
+K_X(t) = \ln M_X(t)
+\end{equation}
+is another function of a random variable whose information is equivalent to the probability density function.  Here, we can expand the logarithm about unity, $\ln(1+x) = t - \frac{t^2}{2} + \cdots$, to derive the first two terms of the infinite series,
+\begin{align}
+K_X(t) &= \left( t\mathbb{E}X + \frac{t^2}{2}\mathbb{E}X^2 + \cdots \right) + \frac{1}{2} \left( t\mathbb{E}X + \cdots \right)^2 + \cdots \notag \\
+&= t\mathbb{E}X + \frac{t^2}{2} \left(\left(\mathbb{E}X \right)^2 - \mathbb{E}X^2 \right) + \cdots.
+\end{align}
+The second term in the cumulant expansion is the variance of the random variables.
+
+As with moment-generating functions, the cumulant of the scaled random variable is the cumulant function operating on the scaled parameter,
+\begin{equation}
+K_{cX}(t) = K_X(ct),
+\end{equation}
+while for independent random variables, $X$ and $Y$, the joint cumulant function is expressed as the sum of the marginals,
+\begin{equation}
+K_{X,Y}(s, t) = K_X(s) + K_Y(t).
+\end{equation}
+
+\subsubsection{Extensions to Random Vectors}\label{sec:extensions_random_vectors}
+Each of the functions defined above -- the moment-generating, characteristic, and cumulant functions -- can be extended to cover multivariate distributions, represented as vectors, $\mathbf{X}$.  The parameter is also modified, coverted to a vector with matching dimension, so that we have,
+\begin{equation}
+\begin{rcases}
+X \rightarrow \mathbf{X} \\
+t \rightarrow \mathbf{t}
+\end{rcases} \Rightarrow
+\begin{cases}
+M_{\mathbf{X}}(\mathbf{t}) \equiv \mathbb{E}e^{\mathbf{t}^\top \mathbf{X}} \\
+K_{\mathbf{X}}(\mathbf{t}) \equiv \ln M_{\mathbf{X}}(\mathbf{t}) \\
+\phi_{\mathbf{X}}(\mathbf{t}) \equiv \mathbb{E}e^{i\mathbf{t}^\top \mathbf{X}}
+\end{cases}
+\end{equation}
+Properties due to scaling and to application to independent coordinate random variables carry over as expected.
+
+\subsection{Transformations}\label{sec:transformations}
+\subsubsection{General Transformation}\label{sec:general_transformation}
+\begin{equation}
+Y = g(X)
+\end{equation}
+
+\begin{align}
+&\text{increasing function, }g: F_Y(y) = \mathbb{P}(Y \leq y) = \mathbb{P}(g(X) \leq Y = \mathbb{P}(X \leq g^{-1}(y)) = F_X(g^{-1}(y)) \\
+&\text{decreasing function, }g: F_Y(y) = \mathbb{P}(Y \leq y) = \mathbb{P}(g(X) \leq Y = \mathbb{P}(X \geq g^{-1}(y)) = 1 - F_X(g^{-1}(y))
+\end{align}
+
+\begin{equation}\label{eq:general_transformation}
+p_Y(y) = \frac{d}{dy}F_Y(y) = p_X(g^{-1}(y)) \left|\frac{d}{dy}g^{-1}(y) \right|
+\end{equation}
+
+\subsubsection{Scale-location Adjustment}\label{sec:scale-location_adjustment}
+
+\begin{equation}
+X \sim p(x) \Rightarrow \alpha + \beta X \sim \frac{1}{\beta}p(\alpha + \beta x)
+\end{equation}
+
+\subsubsection{Sum of Random Variables}
+
+Finally, let $Z = X + Y$ be the sum of two independent random variables
+\begin{equation}
+\phi_{X+Y}(t) = \phi_X(t)\phi_Y(t) \Rightarrow p_{X+Y}(z) = \int_{-\infty}^{\infty}p_X(x)p_Y(z-x)\, dx
+\end{equation}
+
+\section{Common Functions}\label{sec:common_functions}
+Many of the common distributions used as continuous probabilistic models, described in detail below in $\S$\ref{sec:continuous_distributions}, can be expressed in closed form using functions defined through definite integrals.
+
+\subsection{The  Error Function}\label{sec:error_function}
+The \textbf{error function} and \textbf{complementary error function} are defined as,
+\begin{align}
+&\operatorname{erf} (x) = \frac{2}{\sqrt{\pi}} \int_0^x e^{-t^2} \,dt \\
+&\operatorname{erfc}(x) = 1 - \operatorname{erf}(x)
+\end{align}
+which are used for closed-form expression of cumulative Gaussian probabilities, as shown in $\S$\ref{sec:Gaussian_distribution}.  Notice that the argument, $x$, appears as the limit of integration.
+
+\subsection {The Gamma Function}\label{sec:gamma_function}
+The \textbf{gamma function} is a generalization of the factorial function, extending the application from positive integers to the entire real number line.  The function is defined as
+\begin{equation}\label{eq:gamma_function}
+\Gamma(x) = \int_0^\infty t^{x-1} e^{-t} dt,
+\end{equation}
+for which the argument, $x$, appears as a parameter within the definite integral.  The recursive property of the function is demonstrated though integration by parts,
+\begin{align}
+\Gamma(x) &= \int_0^\infty t^{x-1} e^{-t}\, dt \notag \\
+&= \left. -t^{x-1}e^{-t} \right|_0^\infty - \int_0^\infty (x-1)t^{x-2}(-e^{-t}) \,dt \notag \\
+&= (x-1) \int_0^\infty t^{x-2} e^{-t} \,dt \notag \\
+&= (x-1) \Gamma(x-1).
+\end{align}
+By restricting the argument to integral values, $x = n$, we recover the factorial relation,
+\begin{equation}
+\Gamma(n) = (n-1)!
+\end{equation}
+
+\subsection {The Beta Function}\label{sec:beta_function}
+The \textbf{beta function} is bivariate function defined through the definite integral,
+\begin{equation}\label{eq:beta_function}
+\operatorname{B}(x,y) = \int_0^1 t^{x-1} (1-t)^{y-1} dt
+\end{equation}
+for which the arguments appear as parameters in the integrand.  The beta function can also be defined through gamma functions, since
+\begin{align}
+\Gamma(x) \Gamma(y) &= \int_0^\infty s^{x-1}e^{-s} \,ds \int_0^\infty t^{y-1}e^{-t}\,dt \notag \\
+&= \int_0^\infty \int_0^\infty s^{x-1} t^{y-1} e^{-(s+t)}\, ds \, dt  \hspace{60pt}
+\begin{cases}
+s = uv \\
+t = u(1-v)
+\end{cases}
+\notag \\
+&= \int_{u=0}^\infty \int_{v=0}^1 (uv)^{x-1} (u(1-v))^{y-1} e^{-u} u \,du \, dv  \hspace{16pt} |J| = u \notag \\
+&= \int_0^\infty e^{-u} u^{x+y-1} \,du \int_0^1 v^{x-1} (1-v)^{y-1} \,dv \notag \\
+&= \Gamma(x+y) \operatorname{B}(x,y)
+\end{align}
+which can be rearrange to yield,
+\begin{equation}\label{eq:beta_gamma_function}
+\operatorname{B}(x,y) = \frac{\Gamma(x) \Gamma(y)}{\Gamma(x+y)}.
+\end{equation}
+
+As a special case, the beta function evaluated at the points, $x = y = \frac{1}{2}$, 
+\begin{align}
+\operatorname{B}\left( \frac{1}{2}, \frac{1}{2} \right) &= \int_0^1t^{-\frac{1}{2}} (1-t)^{-\frac{1}{2}} \,dt \notag \\
+&= 2\int_0^{\frac{\pi}{2}} \frac{\cos \theta \sin \theta}{\cos \theta \sin \theta} \,d\theta \notag \\
+&= \pi
+\end{align}
+can also be used to calculate the gamma function at the point, $x = \frac{1}{2}$,
+\begin{equation}
+\operatorname{B}\left( \frac{1}{2},\frac{1}{2} \right) = \frac{\Gamma(\frac{1}{2}) \Gamma(\frac{1}{2})}{\Gamma(1)} \Rightarrow \Gamma \left( \frac{1}{2} \right) = \sqrt{\operatorname{B}\left(\frac{1}{2}, \frac{1}{2} \right)} = \sqrt{\pi}.
+\end{equation}
+
+Finally, notice that the combinatorial function can be expressed as in terms of the beta function,
+\begin{equation}\label{eq:combinatorial_beta_relation}
+\binom{n}{k} \equiv \frac{n!}{k! \, (n-k)!} \equiv \frac{1}{n+1}\frac{1}{\operatorname{B}(k+1, n-k+1)}.
+\end{equation}
+
+\subsubsection {The Multivariate Beta Function}
+The relation between beta and gamma functions in (\ref{eq:beta_gamma_function}) can be generalized for multivariate argument,
+\begin{equation}\label{eq:multivariate_beta_function}
+\operatorname{B}(\alpha_1, \ldots, \alpha_n) = \frac{\prod_{i=1}^n \Gamma(\alpha_i)}{\Gamma \left( \sum_{i=1}^n \alpha_i \right)}.
+\end{equation}
+This can be alternatively expressed in terms of a beta function of an arbitrary argument, and the sum of the remainder, as in
+\begin{equation}
+\operatorname{B}(\alpha_1, \ldots, \alpha_n) = \frac{\Gamma(\alpha_j) \prod_{i \neq j} \Gamma(\alpha_i)}{\Gamma \left( \alpha_j + \sum_{i \neq j} \alpha_i \right)} = \frac{\prod_{i \neq j} \Gamma(\alpha_i)}{\Gamma (\sum_{i \neq j} \alpha_i)} \operatorname{B} \left(\alpha_j, \sum_{i \neq j} \alpha_i \right).
+\end{equation}
+
+\section{Common Distributions}\label{sec:common_distributions}
+\subsection{Discrete Distributions}\label{sec:discrete_distributions}
+Discrete distributions are frequently used to model IID sampling from populations with a finite number of types. The type counts may be two or many, the populations may be infinite (with replacement) or finite (without replacement), there may be constraints on the total number or position of specific sample types, but distinct sample values are uncorrelated in all distributions treated here.
+
+For the distributions sampled from binary populations -- two types, typically `true' or `false' -- the weights can be taken from positions within horizontal or diagonal rows in Pascal's triangle.  Or similarly, all can be ultimately expressed as combinations of binary samples, each of which is a \textbf{Bernoulli trial}.
+
+\subsubsection{Sampling With Replacement}\label{sec:sampling_with_replacement}
+
+\paragraph{Bernoulli}\label{sec:Bernoulli_distribution} $\\ \\$
+The Bernoulli distribution is derived from a single sample from a binary distribution for which the positive outcome is given a value, $0 \leq p \leq 1$.  This can be expressed succintly as
+\begin{equation}
+\operatorname{Ber}(p) \equiv f(k|p) = p^k (1-p)^{1-k}, k \in \{0, 1\}
+\end{equation}
+
+The low-order moments are given by
+\begin{align}
+\text{mean: } & p \\
+\text{variance: } & p(1-p)
+\end{align}
+
+This is the very tip of Pascal's triangle.
+
+\paragraph{Binomial}\label{sec:binomial_distribution} $\\ \\$
+The binomial distribution provides the estimate of $k$ successes in $n$ samples, each of which is a Bernoulli trial, so that
+\begin{equation}
+X_i \sim \operatorname{Ber}(p) \Rightarrow Y = \sum_{i=1}^n X_i \sim \operatorname{Bin}(n,p)
+\end{equation}
+
+The form of the density function is the product of success and failure probabilities, weighted by the total number of combinations:
+\begin{equation}
+\operatorname{Bin}(n,p) \equiv f(k|n,p) = \binom nk p^k(1-p)^{n-k}, k \in \{0, \cdots, n\}
+\end{equation}
+
+The low-order moments are given by
+\begin{align}
+\text{mean: } & np \\
+\text{variance: } & np(1-p)
+\end{align}
+
+These coefficients are supplied by the $n^{th}$ horizontal row of Pascal's triangle.
+
+\paragraph{Negative Binomial}\label{sec:negative_binomial_distribution} $\\ \\$
+The negative binomial distribution covers the case in which $k$ successes and $r$ failures are recorded among $n = k+r$ independent Bernoulli trials, and the last sample is failure.  This combination can be expressed as the product of binomial and Bernoulli events, expressed as
+\begin{equation}
+\operatorname{NB}(k|r,p) = \operatorname{Bin}(k|k+r-1, p) \operatorname{Ber}(0|p)
+\end{equation}
+and so the density function takes the form.
+\begin{equation}
+\operatorname{NB}(k|r,p) \equiv f(k|r,p) = \binom {k+r-1}{k} p^k (1-p)^{r}, k \in \mathbb{N}.
+\end{equation}
+
+The low-order moments are given by
+\begin{align}
+\text{mean: } & \frac{rp}{1-p} \\
+\text{variance: } & \frac{rp}{(1-p)^2}
+\end{align}
+ 
+Note that the coefficients are supplied by the $r^{th}$ diagonal column of Pascal's triangle.
+
+\paragraph{Geometric}\label{sec:geometric_distribution} $\\ \\$
+The geometric distribution is a special case of the negative binomial distribution, for which success and failure are interchanged and a single success is recorded:
+\begin{equation}
+\operatorname{Geo}(n|p) = \operatorname{NB}(n-1|1,1-p) = p(1-p)^{n-1}, n\in \mathbb{N}.
+\end{equation}
+
+The low-order moments are given by
+\begin{align}
+\text{mean: } & \frac{1-p}{p} \\
+\text{variance: } & \frac{1-p}{p^2}
+\end{align}
+
+Here, for consistency with definitions of the binomial and negative binomial distributions the variable that enters into the density formula is $n$, defined as number of trials. 
+
+\paragraph{Poisson}\label{sec:Poisson_distribution} $\\ \\$
+The Poisson distribution is a discrete distribution with a continuous weight,
+\begin{equation}
+\operatorname{Poi}(\lambda) = f(k|\lambda) = \frac{\lambda^k}{k!} e^{-\lambda}, k \in \mathbb{N}.
+\end{equation}
+
+The distribution can be derived from the binomial distribution in the asymptotic limit as the parameter, $\lambda = np$, is the product of sample size and success probability, and the number of samples diverges.  For any finite sample size we have
+\begin{align}
+\operatorname{Bin}\left(n, \frac{\lambda}{n}\right) &= f\left( k\left|n, \frac{\lambda}{n}\right. \right) = \binom nk \left( \frac{\lambda}{n} \right)^k \left(1-\frac{\lambda}{k} \right)^{n-k} \notag \\
+&= \frac{n \cdot n-1 \cdot \cdots \cdot n-k +1}{k!} \frac{\lambda^k}{n^k} \left(1-\frac{\lambda}{n}\right)^n \left(1 - \frac{\lambda}{n} \right)^k \notag \\
+&= \left[ \left( \frac{n}{n}\right) \cdot \left(\frac{n-1}{n} \right) \cdot \cdots \cdot \left( \frac{n-k+1}{n}\right) \right]\cdot \left[ \left(1-\frac{\lambda}{n} \right)^{-k}\right]\cdot \left[ \frac{\lambda^k}{k!} \left(1-\frac{\lambda}{n} \right)^{n}\right]
+\end{align}
+which yields the Poisson distribution in the limit,
+\begin{equation}
+\lim_{n \rightarrow \infty} \operatorname{Bin} \left(n, \frac{\lambda}{n} \right) = \frac{\lambda^k}{k!}e^{-\lambda} \equiv \operatorname{Poi}(\lambda).
+\end{equation}
+
+The low-order moments are given by 
+\begin{align}
+\text{mean: } & \lambda \\
+\text{variance: } & \lambda
+\end{align}
+
+\paragraph{Multinomial}\label{sec:multinomial_distribution} $\\ \\$
+The multinomial distribution is realized from the sum of $n$ repeated \textit{dependent} Bernoulli trials, each parametrized by potentially different probabilities of individual success, $p_i$, and linked by the requirement that one, and only one, may be successful on any given trial, $\sum_{i=1}^k p_i = 1$:
+
+\begin{equation}
+\operatorname{Mul}(n,p_1, \cdots, p_k) \equiv f(x_1, \cdots, x_k | n, p_1, \cdots, p_k) = \frac{n}{\prod_{i=1}^k x_i!}\prod_{i=1}^k p_i^{x_i} = \frac{\Gamma (1 + \sum_{i=1}^k x_i)}{\prod_{i=1}^k \Gamma(1 + x_i)} \prod_{i=1}^k p_i^{x_i}
+\end{equation}
+
+
+\begin{equation}
+X_1, \cdots, X_k \sim \operatorname{Mul}(n, p_1, \cdots, p_k) \Rightarrow 
+\begin{cases}
+\mathbb{E}X_i = np_i \\
+\mathbb{V}X_i = np_i (1-p_i) \\
+\mathbb{C}(X_i, X_j) = -np_i p_j, i \neq j
+\end{cases}
+\end{equation}
+
+\subsubsection{Sampling Without Replacement}\label{sec:sampling_without_replacement}
+
+\paragraph{Hypergeometric}\label{sec:hypergeometric_distribution} $\\ \\$
+The \textbf{hypergeometric distribution} is closely related to the binomial distribution, with samples taken from a finite population without replacement.  Here, the total population and number of possible successes are given by $N$ and $K$, respectively, while the number of samples and sampled successes are represented as $n$ and $k$.  The distribution is defined as
+\begin{equation}
+\operatorname{Hyp}(n,N,K) \equiv f(k|n,N,K) = \frac{\binom Kk \binom {N-K}{n-k}}{\binom Nn}
+\end{equation}
+
+The low-order moments are given by
+\begin{align}
+\text{mean: } & n\frac{K}{N} \\
+\text{variance: } & n\frac{K}{N} \frac{N-K}{N} \frac{N - n}{N - 1}
+\end{align}
+
+\paragraph{Multivariate Hypergeometric}\label{sec:multivariate_hypergeometric_distribution} $\\ \\$
+The \textbf{multivariate hypergeometric distribution} is the multivariate version of the multinomial distribution.  For the case of $m$ categories the distribution is given by
+\begin{equation}
+\begin{rcases}
+\mathbf{k} = (k_1, \ldots, k_m)^\top \\
+\mathbf{K} = (K_1, \ldots, K_m)^\top
+\end{rcases} \Rightarrow
+\operatorname{MHG}(\mathbf{k}|\mathbf{K}) = \frac{\binom {K_1}{k_1} \cdots \binom {K_m}{k_m}}{\binom {\sum_{i=1}^m K_i}{\sum_{i=1}^m k_i}}
+\end{equation}
+
+\subsection{Continuous Distributions}\label{sec:continuous_distributions}
+We collect a few of the most common continuous distribution in the following sections, showing
+\begin{itemize}[noitemsep]
+\item probability density and cumulative distribution functions
+\item moment-generating and/or characteristic functions
+\item mean and variance
+\item sums of random variables
+\item mulitvariate versions.
+\end{itemize}
+
+\subsubsection{Gaussian Distributions}\label{sec:Gaussian_distribution}
+The Gaussian distribution, also called the \textbf{normal distribution}, is perhaps the most important distribution of all, governing asymptotic distributions of sample means through the central limit theorem, as discussed in $\S$\ref{sec:central_limit_theorem}.  Since many phenomena are composed of small, additive processes, the Gaussian distribution serves well as a general model.  Many other distributions, such as the chi-square distribution, T-distribution and F-distribution, are derived from transformed Gaussian random variables, and lead ultimately to many common statistical tests.
+
+\paragraph{Univariate Gaussian}\label{sec:univariate_Gaussian_distribution} $\\ \\$
+The univariate Gaussian distribution is defined by two parameters, $\mu$ and $\sigma^2$, which specify the mean and variance of the distribution, respectively.  The probability density and cumulative distribution functions for the univariate Gaussian distribution are given by
+\begin{align}
+\text{probability density:} \hspace{10pt} & \operatorname{N}(\mu, \sigma^2) \equiv p_{\operatorname{N}}(x|\mu, \sigma^2) = \frac{1}{\sigma \sqrt{2\pi}} e^{-\frac{(x-\mu)^2}{2\sigma^2}} \\
+\text{cumulative distribution:} \hspace{10pt} &  F_{\operatorname{N}}(x|\mu, \sigma^2) =  \int_{-\infty}^x p_{\operatorname{N}}(x|\mu, \sigma^2)\,dx = \frac{1}{2} \left(1 + \operatorname{erf}\left( \frac{x-\mu}{\sigma \sqrt{2}}\right) \right)
+\end{align}
+
+The moments of the Gaussian distribution can be calculated by way of a helper function,
+\begin{equation}
+g(\alpha) = \frac{1}{\sigma \sqrt{2\pi}}\int_{-\infty}^{\infty} e^{-\alpha \frac{(x-\mu)^2}{2\sigma^2}}\,dx = \frac{1}{\sqrt{\alpha}},
+\end{equation}
+and the central moments are derived by direct calcuation,
+\begin{align}
+&\mathbb{E}(X-\mu)^{2n-1} = 0 \\
+&\mathbb{E}(X-\mu)^{2n} = \frac{1}{\sigma \sqrt{2\pi}}\int_{-\infty}^{\infty}(x-\mu)^{2n} e^{- \frac{(x-\mu)^2}{2\sigma^2}}\,dx = (-2\sigma^2)^n \left. \frac{d^n}{d\alpha^n}g(\alpha) \right|_{\alpha = 1} = (2n-1)!! \, \sigma^{2n}
+\end{align}
+
+Notice that, by symmetry all odd central moments vanish, and even central moments are expressed in powers of the parameter, $\sigma^2$.  All information in the Gaussian distribution is derived from the parameters, $\mu$ and $\sigma^2$, which are the mean and variance of the distribution, established by assigning $n = 1$ and $2$.
+
+\begin{align}
+M_{\operatorname{N}(\mu,\sigma^2)}(t) \equiv \mathbb{E}e^{tX} &= \frac{1}{\sigma \sqrt{2\pi}} \int_{-\infty}^{\infty} e^{tx} e^{-\frac{(x-\mu)^2}{2\sigma^2}}\,dx = \frac{1}{\sigma \sqrt{2\pi}}\int_{-\infty}^{\infty} e^{-\frac{(x-\mu)^2 - tx}{2\sigma^2}}\,dx \notag \\
+&= e^{t\mu + \frac{1}{2}t^2\sigma^2} \frac{1}{\sigma \sqrt{2\pi}}\int_{-\infty}^{\infty} e^{-\frac{(x-(\mu + t\sigma^2))^2 }{2\sigma^2}}\,dx \notag \\
+&= e^{t\mu + \frac{1}{2}t^2\sigma^2}
+\end{align}
+
+\begin{equation}
+\phi_{\operatorname{N}(\mu,\sigma^2)}(t) \equiv \mathbb{E}e^{itX} = e^{it\mu - \frac{1}{2}t^2\sigma^2} \hspace{195pt}
+\end{equation}
+
+Finally, the sums of independent Gaussian random variables is also a Gaussian random variable,
+\begin{equation}
+\begin{rcases}
+X \sim \operatorname{N}(\mu, \sigma^2 ) \Rightarrow M_X = e^{t\mu + \frac{1}{2}t^2\sigma^2} \\
+Y \sim \operatorname{N}(\nu, \tau^2 ) \Rightarrow M_Y = e^{t\nu + \frac{1}{2}t^2\tau^2} 
+\end{rcases} \Rightarrow
+M_{X+Y} = e^{t(\mu + \nu) + \frac{1}{2}t^2(\sigma^2 + \tau^2)} \Rightarrow X + Y \sim \operatorname{N}(\mu + \nu, \sigma^2 + \tau^2).
+\end{equation}
+
+\paragraph{Standard Normal}\label{sec:standard_normal_distribution} $\\ \\$
+The \textbf{standard normal} distribution is a special case of the Gaussian distribution for which the mean and variance are given by $\mu = 0$ and $\sigma^2 = 1$, respectively, so that the standard normal random variable, $Z$, is represented as
+\begin{equation}
+Z \sim \operatorname{N}(0, 1).
+\end{equation}
+All other derived quantities and functions are calculated similarly.
+
+
+\subsubsection{Gamma-Derived Distributions}\label{sec:gamma-derived_distributions}
+The form of the probability density functions in this section are derived from the gamma function, shown above in $\S$\ref{sec:gamma_function}.  The gamma distribution is a common choice for models that restrict the domain to the positive real line.
+
+\paragraph{Gamma}\label{gamma_distribution} $\\ \\$
+ The probability density function for the gamma distribution is governed by two parameters, $\alpha$ and $\beta$, and takes the form,
+\begin{align}\label{eq:gamma_distribution_density}
+\text{probability density: } & \Gamma(\alpha, \beta) \equiv p_\Gamma(x|\alpha, \beta) = \frac{\beta^\alpha}{\Gamma(\alpha)}x^{\alpha - 1}e^{-\beta x}, \;x \geq 0.
+\end{align}
+The specific form is derived from the gamma function, whose expression is a definite integral over the positive real numbers given in (\ref{eq:gamma_function}), for the parameter, $\alpha$,
+\begin{align}
+\Gamma(\alpha) &= \int_0^\infty t^{\alpha -1}e^{-t}\,dt \notag \\
+&= \int_0^\infty (\beta x)^{\alpha - 1} e^{-\beta x} \beta \,dx \hspace{20pt} t = \beta x \notag \\
+&= \int_0^\infty \beta^\alpha x^{\alpha - 1} e^{-\beta x} \,dx
+\end{align}
+and for which the parameter, $\beta$, is introduced as a scaling variable for the integration.  The integrand of the density function in (\ref{eq:gamma_distribution_density}) matches the integrand of the normalizing constant, and so the total weight is unity.
+
+It is a straightforward exercise in integration to calculate the moments of the gamma distribution, since one part of the integrand is a power of the independent variable.  This leads to a rearrangement of the terms inside the integral, which can be expressed as gamma distribution governed by \textit{a different} parameter set that must also possess unit weight:
+\begin{align}
+\mathbb{E}X^n &= \frac{\beta^\alpha}{\Gamma(\alpha)} \int_0^\infty x^k x^{\alpha -1}e^{-\beta x} \,dx \notag \\
+&= \frac{\beta^\alpha}{\beta^{\alpha + k}} \frac{\Gamma(\alpha + k)}{\Gamma(\alpha)} \int_0^\infty \frac{\beta^{\alpha + k}}{\Gamma(\alpha + k)} x^{\alpha + k - 1} e^{-\beta x}\,dx \notag \\
+&= \frac{1}{\beta^k} \frac{\Gamma(\alpha + k)}{\Gamma(\alpha)} \int_0^\infty p_\Gamma(x|\alpha + k, \beta)\,dx \notag \\
+&= \frac{1}{\beta^k} \frac{\Gamma(\alpha + k)}{\Gamma(\alpha)}
+\end{align}
+
+The mean and variance are therefore given by
+\begin{align}
+&\mathbb{E}X = \frac{\alpha}{\beta}; \label{eq:gamma_distribution_mean}\\
+&\mathbb{V}X = \mathbb{E}X^2 - (\mathbb{E}X)^2 = \frac{(\alpha + 1)\alpha}{\beta^2} - \frac{\alpha^2}{\beta^2} = \frac{\alpha}{\beta^2} \label{eq:gamma_distribution_variance}.
+\end{align}
+
+The moment-generating function is calculated through direct integration, since the other factor in the integrand is an exponential.  We can therefore use the same technique of rearranging terms to form a different gamma distribution, this one for a transformation of the $\beta$-parameter,
+\begin{align}
+M_{\Gamma(\alpha, \beta)} \equiv \mathbb{E} e^{tX} &= \int_0^\infty e^{tx} \frac{\beta^\alpha}{\Gamma(\alpha)} x^{\alpha-1} e^{-(\beta - t)x}\,dx \notag\\
+&= \frac{\beta^\alpha}{(\beta - t)^\alpha} \int_0^\infty \frac{(\beta - t)^\alpha}{\Gamma(\alpha)} x^{\alpha - 1} e^{-(\beta - t)x}\,dx \notag \\
+&= \left( \frac{\beta}{\beta - t} \right)^\alpha \int_0^\infty f_\Gamma (x|\alpha, \beta - t)\,dx \notag \\
+&= \left( \frac{\beta}{\beta - t} \right)^\alpha.
+\end{align}
+
+We can immediately apply the information in the moment-generating function to show that the sum of independent gamma distributions, all of which share the value of the $\beta$-parameter, is again a gamma distribution whose $\alpha$-parameter is the sum of the individual $\alpha$ values:
+\begin{equation}\label{eq:gamma_distribution_sum}
+X_i \sim \Gamma(\alpha_i, \beta) \Rightarrow \sum_{i=1}^n X_i \sim \Gamma\left(\sum_{i=1}^n \alpha_i,\beta \right).
+\end{equation}
+
+This follows from the uniqueness of moment-generating function,
+\begin{equation}
+M_{\sum \Gamma(\alpha_i,\beta)} = \prod \left( \frac{\beta}{\beta - t} \right)^{\alpha_i} =  \left( \frac{\beta}{\beta - t} \right)^{\sum \alpha_i} = M_{ \Gamma(\sum\alpha_i,\beta)}.
+\end{equation}
+
+\paragraph{Chi-square}\label{sec:chi-square_distribution} $\\ \\$
+Given a standard normal distribution, $X$, (\textit{cf.} $\S$\ref{sec:standard_normal_distribution}), the \textit{square} of the random variable, $X^2$, is distributed as \textbf{chi-square}:
+\begin{equation}
+X \sim \operatorname{N}(0,1) \Rightarrow X^2 \sim \chi^2 = \Gamma \left( \frac{1}{2}, \frac{1}{2} \right),
+\end{equation}
+which is a special case of the gamma distribution.  This can be calculated directly from the cumulative distribution function of the standard normal, since
+\begin{equation}
+\mathbb{P}\{ X^2 \leq x \} = \mathbb{P}\{ -\sqrt{x} \leq X \leq \sqrt{x} \} = \int_{-\sqrt{x}}^{\sqrt{x}} \frac{1}{\sqrt{2\pi}} e^{-\frac{t^2}{2}}\,dt,
+\end{equation}
+and the probability density function is calculated from the derivative,
+\begin{align}\label{eq:chi-square_derivation}
+\chi^2 \equiv p_{\chi^2}(x) &= \frac{d}{dx} \int_{-\sqrt{x}}^{\sqrt{x}} \frac{1}{\sqrt{2\pi}} e^{-\frac{t^2}{2}}\,dt \notag \\
+&= \left( \frac{1}{\sqrt{2\pi}} e^{-\frac{x}{2}}\right) \left( \frac{1}{2} x^{-\frac{1}{2}}\right) - \left( \frac{1}{\sqrt{2\pi}} e^{-\frac{x}{2}}\right) \left( -\frac{1}{2} x^{-\frac{1}{2}}\right) \notag \\
+&= \frac{1}{\sqrt{2\pi}} x^{\frac{1}{2} - 1} e^{-\frac{x}{2}} \notag \\
+&= \Gamma\left( \frac{1}{2}, \frac{1}{2} \right).
+\end{align}
+
+Since sums of independent gamma random variables are also gamma distributed, as in (\ref{eq:gamma_distribution_sum}), the sum of$n$ chi-square random variables is also gamma distributed, and is called the \textbf{chi-square distribution with $n$ degrees of freedom}:
+\begin{equation}
+X_i \sim \operatorname{N}(0,1) \Rightarrow \sum_{i=1}^n X_i^2 \sim \chi_n^2 = \Gamma \left( \frac{n}{2}, \frac{1}{2} \right).
+\end{equation}
+
+The mean and variance of the chi-square distribution with $n$ degrees of freedom follows directly from (\ref{eq:gamma_distribution_mean}) and(\ref{eq:gamma_distribution_variance}),
+\begin{equation}
+X \sim \chi_n^2 \Rightarrow
+\begin{cases}
+\mathbb{E}X = n ; \\
+\mathbb{V}X = \frac{n}{2} .
+\end{cases}
+\end{equation}
+
+Finally, the \textbf{Mahalanobis distance}, which is the argument in the exponential of the multivariate Gaussian, is chi-square distributed, since given the eigenstructure of the covariance matrix,
+\begin{equation}
+\boldsymbol{\Sigma} = \mathbf{Q} \mathbf{D} \mathbf{Q}^\top = \boldsymbol{\Gamma} \boldsymbol{\Gamma}^\top \Rightarrow \mathbf{Z} = \boldsymbol{\Gamma}^{-1} (\mathbf{X} - \boldsymbol{\mu}),
+\end{equation}
+we have
+\begin{equation}
+\mathbf{X} \sim \operatorname{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma}) \Rightarrow (\mathbf{X} - \boldsymbol{\mu})^\top \boldsymbol{\Sigma}^{-1}(\mathbf{X} - \boldsymbol{\mu}) = \mathbf{Z}^\top \mathbf{Z} \sim \chi_n^2.
+\end{equation}
+
+This is the multivariate extension to the chi-square derivation shown above in (\ref{eq:chi-square_derivation}).
+
+\paragraph{Inverse Gamma}\label{sec:inverse_gamma_distribution} $\\ \\$
+Given a random variable, $X$, that is gamma distributed, the inverse random variable is inverse gamma distributed,
+
+\begin{equation}
+X \sim \Gamma(\alpha, \beta) \Rightarrow \frac{1}{X} \sim \operatorname{I\Gamma}(\alpha, \beta) \equiv p_{\operatorname{I\Gamma}} (x | \alpha, \beta) = \frac{\beta^\alpha}{\Gamma(\alpha)}\left( \frac{1}{x} \right)^{\alpha + 1}e^{-\frac{\beta}{x}}, \;x > 0.
+\end{equation}
+
+The derivation of the form of the probability density function is a straightforward application of the formula for general transformation of random variables in (\ref{eq:general_transformation}):
+
+\begin{align}
+Y = \frac{1}{X} \Rightarrow p_Y(y) &= p_X(g^{-1}(y)) \left|\frac{d}{dy}g^{-1}(y) \right| \notag \\
+&= \frac{\beta^\alpha}{\Gamma(\alpha)} \left( \frac{1}{y} \right)^{\alpha - 1} e^{-\frac{\beta}{y}}\frac{1}{y^2} \notag \\
+&= \frac{\beta^\alpha}{\Gamma(\alpha)} \left( \frac{1}{y} \right)^{\alpha + 1} e^{-\frac{\beta}{y}} .
+\end{align}
+
+\subsubsection{Beta-Derived Distributions}\label{sec:beta-derived_distributions}
+The form of the probability density functions in this section are derived from the beta function, shown above in $\S$\ref{sec:beta_function}.  The beta distribution is a common choice for models that restrict the domain to the unit interval.
+
+\paragraph{Beta}\label{sec:beta_distribution} $\\ \\$
+ The probability density function for the gamma distribution is governed by two parameters, $\alpha$ and $\beta$, and takes the form,
+\begin{equation}
+\text{probability density: } \operatorname{B}(\alpha, \beta) \equiv p_{\operatorname{B}}(x|\alpha, \beta) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)}x^{\alpha -1}(1-x)^{\beta-1}, \hspace{20pt}0\leq x \leq 1
+\end{equation}
+
+It is a straightforward exercise in integration to calculate the moments of the beta distribution, since one part of the integrand is a power of the independent variable.  This leads to a rearrangement of the terms inside the integral, which can be expressed as a beta distribution governed by \textit{a different} parameter set that must also possess unit weight:
+\begin{align}
+\mathbb{E}X^k &= \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)} \int_0^1 x^k x^{\alpha -1}(1-x)^{\beta-1}\,dx \notag \\
+&= \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)} \frac{\Gamma(\alpha + k) \Gamma(\beta)}{\Gamma(\alpha + \beta +k)} \int_0^1 \frac{\Gamma(\alpha + \beta + k)}{\Gamma(\alpha + k)\Gamma(\beta)} x^{\alpha + k -1}(1-x)^{\beta - 1} \,dx \notag \\
+&= \frac{\Gamma(\alpha + k)}{\Gamma(\alpha)}\frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha + \beta + k)} \int_0^1 p_{\operatorname{B}}(x|\alpha + k, \beta) \,dx \notag \\
+&= \frac{\Gamma(\alpha + k)}{\Gamma(\alpha)}\frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha + \beta + k)}.
+\end{align}
+
+The mean and variance of the beta distribution are therefore given by
+\begin{align}
+&\mathbb{E}X = \frac{\alpha}{\alpha + \beta}; \\
+&\mathbb{V}X = \mathbb{E}X^2 - (\mathbb{E}X)^2 = \frac{(\alpha + 1) \alpha}{(\alpha + \beta + 1)(\alpha + \beta)} - \frac{\alpha^2}{(\alpha + \beta)^2} = \frac{\alpha \beta}{(\alpha + \beta)^2(\alpha + \beta + 1)}.
+\end{align}
+
+\paragraph{Dirichlet}\label{sec:Dirichlet_distribution} $\\ \\$
+The \textbf{Dirichlet distribution} is a multivariate extension to the beta distribution, governed by an arbitrary number of parameters, $\alpha_1, \cdots, \alpha_n$, and takes the form
+\begin{equation}
+\text{probability density: } \operatorname{Dir}(\alpha_1, \cdots, \alpha_n) \equiv p_{\operatorname{D}}(x_1, \cdots, x_n|\alpha_1, \cdots, \alpha_n) = \frac{\prod_{i=1}^n x_i^{\alpha_i - 1}}{\operatorname{B}(\alpha_1, \cdots, \alpha_n)}, 
+\begin{cases}
+0 \leq x_i \leq 1 \\
+\sum_{i=1}^n x_i = 1
+\end{cases}
+\end{equation}
+Here, the normalizing constant is provided by the multivariate beta function, defined above in (\ref{eq:multivariate_beta_function}).
+
+Notice that the marginal distributions, $X_i$ -- formed by isolating a single parameter, $\alpha_i$, while lumping the remainder together, $\beta = \sum_{j \neq i} \alpha_j$ -- yield beta distributions,
+\begin{equation}
+p_D(x_i|\alpha_1, \cdots, \alpha_n) = p_{\operatorname{B}}\left(x_i\left|\alpha_i, \sum_{j\neq i} \alpha_j\right.\right) = \frac{x_i^{\alpha_i - 1}(1-x_i)^{\sum_{j\neq i}\alpha_j - 1}}{\operatorname{B}(\alpha_i, \sum_{j\neq i}\alpha_j)}.
+\end{equation}
+
+The mean and variance are straightforward generalizations of the values for the beta distribution as well,
+\begin{align}
+&\mathbb{E}X_i = \frac{\alpha_i}{\sum_{j=1}^n \alpha_j}; \\
+&\mathbb{V}X_i = \frac{\alpha_i \sum_{j\neq i}\alpha_j}{\left( \sum_{j=1}^n \alpha_j \right)^2}.
+\end{align}
+
+
+\subsubsection{Distributions of Ratios of Standard Normal Random Variables}\label{sec:standard_normal_ratio_distributions}
+This section treats distributions that arise as the ratios of standard normal variables, and serve as the basis of common test of statistical properties of the underlying distribution.
+
+\begin{itemize}[noitemsep]
+\item F-distribution: ratio of average sums of squares of standard normal random variables;
+\item T-distribution: ratio of a single standard normal random variable to the square root of theaverage sum of squares of standard normal random variables;
+\item Cauchy distribution: ratio of two standard normal random variables.
+\end{itemize}
+
+Furthermore, all standard normal random variables that participate in the sums and ratios are required to be independent.  And since sums of squares of standard normal random variables are themselves chi-square distributed, the F- and T-distributions can be rephrased in these terms.
+ 
+\paragraph{F-Distribution}\label{sec:F-distribution} $\\ \\$
+The \textbf{F-distribution} is defined as the ratio of average sums of squares of independent standard normal random variables,
+\begin{multline}
+\begin{rcases}
+U_1, \ldots, U_k \\
+V_1, \ldots, V_m 
+\end{rcases}
+\sim Z = \operatorname{N}(0, 1)
+\Rightarrow
+\frac{\frac{1}{k}\sum_{i=1}^k U_i^2}{\frac{1}{m}\sum_{j=1}^m V_j^2} \sim F(k,m), \\ F(k,m) \equiv p_F(x|k, m) = \frac{\Gamma(\frac{k+m}{2})}{\Gamma(\frac{k}{2})\Gamma(\frac{m}{2})} \left( \frac{k}{m} \right)^{\frac{k}{2}} x^{\frac{k}{2} - 1} \left(1 + \frac{k}{m}x \right)^{-\frac{k+m}{2}}
+\end{multline}
+
+Notice that we can define both the numerator and denominator in terms of chi-square distributed variables, which leads to a direct integral representation of the cumulative distribution function,
+\begin{multline}
+\begin{rcases}
+U = \sum_{i=1}^k U_i^2 \sim \chi^2_k \\
+V = \sum_{j=1}^m V_j^2 \sim \chi^2_m
+\end{rcases} \Rightarrow
+\mathbb{P}\left\{ \frac{\frac{U}{k}}{\frac{V}{m}} \leq x\right\} = \mathbb{P}\{U \leq \frac{k}{m} xV\}  \\
+= \iint_{\{U \leq \frac{k}{m} xV\}} p_{\chi^2_k}(u) p_{\chi^2_m}(v) \,du\,dv = \int_0^\infty \int_0^{\frac{k}{m}xv}  p_{\chi^2_k}(u) p_{\chi^2_m}(v) \,du\,dv
+\end{multline}
+
+The probability density function is the derivative of the cumulative function, so that
+\begin{align}
+F(k,m) \equiv p_F(x|k,m) &= \frac{d}{dx} \int_0^\infty \int_0^{\frac{k}{m}xv}  p_{\chi^2_k}(u) p_{\chi^2_m}(v) \,du\,dv = \int_0^\infty \frac{d}{dx}\left( \int_0^{\frac{k}{m}xv} p_{\chi^2_k}(u) \,du \right) p_{\chi^2_m}(v)\,dv \notag \\
+&= \frac{k}{m} \int_0^\infty p_{\chi_k^2}\left(\frac{k}{m}xv\right) p_{\chi_m^2}(v)\,v\,dv \notag \\
+&=\frac{k}{m} \int_0^\infty \left( \frac{\frac{1}{2}^{\frac{k}{2}}}{\Gamma\left( \frac{k}{2}\right)}  \left( \frac{k}{m} xv \right)^{\frac{k}{2} - 1} e^{-\frac{\frac{k}{m}xv}{2}}  \right) 
+\left( \frac{\frac{1}{2}^{\frac{m}{2}}}{\Gamma\left( \frac{m}{2}\right)} v^{\frac{m}{2} -1} e^{-\frac{v}{2}}\right)v\,dv \notag \\
+&= \frac{k^{\frac{k}{2}}}{m} \int_0^\infty \frac{\left(\frac{1}{2}\right)^{\frac{k+m}{2}} x^{\frac{k}{2}-1}}{\Gamma\left( \frac{k}{2}\right) \Gamma \left( \frac{m}{2}\right)} v^{\frac{k+m}{2}-1} e^{-\frac{1}{2}v\left(\frac{k}{m}t+1\right)}\,dv \notag \\
+&= \frac{\Gamma\left( \frac{k+m}{2} \right)}{\Gamma \left( \frac{k}{2} \right) \Gamma \left( \frac{m}{2} \right)} \left( \frac{k}{m} \right)^{\frac{k}{2}} x^{\frac{k}{2}-1} \left( \frac{1}{\frac{k}{m}x+1} \right)^{\frac{k+m}{2}} \int_0^\infty\frac{ \left( \frac{t+1}{2}\right)^{\frac{k+m}{2}}}{\Gamma \left( \frac{k+m}{2} \right)} v^{\frac{k+m}{2}-1} e^{-v\frac{t+1}{2}}  \,dv \notag \\
+&= \frac{\Gamma\left( \frac{k+m}{2} \right)}{\Gamma \left( \frac{k}{2} \right) \Gamma \left( \frac{m}{2} \right)} \left( \frac{k}{m} \right)^{\frac{k}{2}} x^{\frac{k}{2}-1} \left( 1+\frac{k}{m}x \right)^{-\frac{k+m}{2}} \int_0^\infty p_{\Gamma}\left(v\left|\frac{k+m}{2},\frac{t+1}{2}\right.\right)dv \notag \\
+&= \frac{\Gamma\left( \frac{k+m}{2} \right)}{\Gamma \left( \frac{k}{2} \right) \Gamma \left( \frac{m}{2} \right)} \left( \frac{k}{m} \right)^{\frac{k}{2}} x^{\frac{k}{2}-1} \left( 1+\frac{k}{m}x \right)^{-\frac{k+m}{2}}
+\end{align}
+
+\paragraph{T-Distribution}\label{sec:T-distribution} $\\ \\$
+The \textbf{T-distribution} is defined as the ratio of a single standard normal random variable to the square root of an average sum of squares of standard normal random variables, all of which are independent,
+\begin{multline}
+\begin{rcases}
+U_1 \\
+V_1, \ldots, V_m
+\end{rcases}
+\sim Z = \operatorname{N}(0,1)
+\Rightarrow
+\frac{U_1}{\sqrt{\frac{1}{m} \sum_{j=1}^m V_j^2}} \sim T(m), \\ T(m) \equiv p_T(x|m) = \frac{\Gamma(\frac{m+1}{2})}{\Gamma(\frac{1}{2})\Gamma(\frac{m}{2})}\frac{1}{\sqrt{m}}\left(1 + \frac{x^2}{m} \right)^{-\frac{m+1}{2}}
+\end{multline}
+
+It is possible to define the T-distribution in terms of square roots of chi-square random variables, and express the cumulative distribution function in terms of the F-distribution density function,
+\begin{multline}
+\begin{rcases}
+U = U_i^2 \sim \chi^2 \\
+V = \sum_{j=1}^m V_j^2 \sim \chi^2_m 
+\end{rcases} \Rightarrow
+\mathbb{P} \left\{-x \leq \frac{\sqrt{U}}{\sqrt{\frac{1}{m}V}} \leq x \right\} = \mathbb{P} \left\{ \frac{U}{\frac{1}{m}V} \leq x^2 \right\} = \int_0^{x^2} p_F(v|1,m)\,dv
+\end{multline}
+
+The calculation of the density function of the T-distribution is then given by
+\begin{align}
+T(m) \equiv p_T(x|m) &= \frac{1}{2}\frac{d}{dx} \int_0^{x^2} p_F(v|1,m)\,dv = x \, p_F \left(x^2|1,m \right) \notag \\
+&= \frac{\Gamma \left( \frac{m+1}{2} \right)}{\Gamma \left( \frac{1}{2} \right) \Gamma \left( \frac{m}{2} \right)} \frac{1}{\sqrt{m}} \left(1 + \frac{x^2}{m} \right)^{-\frac{m+1}{2}}.
+\end{align}
+
+\paragraph{Cauchy}\label{sec:Cauchy-distribution} $\\ \\$
+The \textbf{Cauchy distribution} is defined as the ratio of independent standard normal random variables,
+\begin{equation}
+\begin{rcases}
+U \\
+V
+\end{rcases}
+\sim Z = \operatorname{N}(0,1)
+\Rightarrow
+\frac{U}{V} \sim \operatorname{Cau}(0,1) \equiv p_C(x) = \frac{1}{\pi}\frac{1}{x^2+1}.
+\end{equation}
+
+The cumulative distribution can be derived by direct integration of standard normal distributions over the appropriate domain,
+\begin{multline}
+\mathbb{P} \left\{ \frac{U}{V} \leq x \right\} = \mathbb{P} \left\{ U \leq xV \right\} = \iint_{\left\{u \leq xv\right\}} p_{\operatorname{N}}(u|0,1) p_{\operatorname{N}}(v|0,1) \,du\,dv \\
+= \int_{-\infty}^\infty \int_{-\infty}^{xv} p_{\operatorname{N}}(u|0,1)p_{\operatorname{N}}(v|0,1)\,du\,dv
+\end{multline}
+
+The probability density function is then the derivative,
+\begin{align}
+\operatorname{Cau}(0,1) \equiv f_{\operatorname{C}}(x) &= \frac{d}{dx} \mathbb{P} \left\{ \frac{U}{V} \leq x \right\} = \frac{d}{dx} \int_0^\infty \int_0^{xv} f_{\operatorname{N}}(u|0,1)f_{\operatorname{N}}(v|0,1)\,du\,dv \notag \\
+&= \int_{-\infty}^{\infty} \left( \frac{d}{dx} \int_{-\infty}^{xv} f_{\operatorname{N}}(u|0,1)\,du \right) f_{\operatorname{N}}(v|0,1)\,dv = \int_{-\infty}^{\infty} f_{\operatorname{N}}(xv|0,1) f_{\operatorname{N}}(v|0,1) \,dv \notag \\
+&= \int_{-\infty}^{\infty} \frac{1}{\sqrt{2\pi}} e^{-\frac{x^2v^2}{2}} \frac{1}{2\pi} e^{-\frac{v^2}{2}}v\,dv = \frac{1}{2\pi} \int_{-\infty}^{\infty} e^{-\frac{v^2(x^2+1)}{2}} v\,dv \notag \\
+&= \frac{1}{2\pi}\frac{1}{x^2+1} \int_{-\infty}^{\infty} e^{-t}\,dt = \frac{1}{\pi}\frac{1}{x^2+1} \int_0^{\infty} e^{-t}\,dt \notag \\
+&= \frac{1}{\pi}\frac{1}{x^2+1}.
+\end{align}
+
+The Cauchy distribution has no moments.  The mean, in particular, although symmetric, is ill-defined: since the half-integral diverges,
+\begin{equation}
+\frac{1}{\pi} \int_0^\infty \frac{x}{x^2 + 1}\;dx = \infty,
+\end{equation}
+the full integral does not converge to any single value.  Symmetry about the origin does, however, require the median be zero.
+
+Finally, the Cauchy distribution is a special case of the T-distribution,
+\begin{equation}
+\operatorname{Cau}(0,1) \equiv T(1)
+\end{equation}
+
+\subsubsection{Other Common  Distributions}\label{sec:other_common_distributions}
+
+
+\paragraph{Uniform}\label{sec:uniform_distribution} $\\ \\$
+The probability density function for the \textbf{uniform distribution} is a constant unit value over the unit interval,
+\begin{equation}
+\operatorname{Uni}(0,1) \equiv p_{\operatorname{U}}(x) = 1, \hspace{5pt} 0 \leq x \leq 1.
+\end{equation}
+
+\paragraph{Exponential}\label{sec:exponential_distribution} $\\ \\$
+The probability density function for the \textbf{exponential distribution} is a weighted exponential over the positive real number line,
+\begin{equation}
+\operatorname{Exp}(\lambda) \equiv p_{\operatorname{E}}(x|\lambda) = \lambda e^{-\lambda x}, \hspace{20pt} x \geq 0.
+\end{equation}
+
+The exponential distribution is \textit{memoryless}, so that cumulative probabilities in future times are independent of values in past times,
+\begin{equation}
+\mathbb{P}\{x > s + t | x > s\} = \mathbb{P}\{x > t\}.
+\end{equation}
+
+In particular, the \textbf{ hazard function} is constant:
+\begin{equation}
+h(t) = \frac{p(t)}{1-\int_0^t p(x)\,dx} = \lambda.
+\end{equation}
+
+\paragraph{Pareto}\label{sec:Pareto_distribution} $\\ \\$
+The Pareto distribution is another power-law distribution in which the probability vanishes below a threshold value, $\alpha_m$, and falls exponentially with parameter, $\alpha$, at values above.  The probability density function is given by 
+\begin{equation}
+\operatorname{Par}(\alpha, x_m) \equiv p_{\operatorname{P}}(x|\alpha, x_m) =
+\begin{cases}
+\frac{\alpha x^\alpha_m}{x^{\alpha + 1}},  \hspace{5pt} x \geq x_m \\
+0, \hspace{20pt} x < x_m
+\end{cases}
+\end{equation}
+
+A key property of the Pareto distribution is that the distribution conditioned on exceeding a given value is itself Pareto,
+\begin{equation}
+\operatorname{Par}(\alpha, x_m | x_1 > x_m) = \operatorname{Par}(\alpha, x_1).
+\end{equation}
+
+The lower-order moments hold a complicated relationship with the exponential parameter,
+\begin{align}
+\text{mean: } & \begin{cases} \alpha \leq 1 & \infty \\ \alpha > 1 & \frac{\alpha x_m}{\alpha - 1} \end{cases} \\
+\text{variance: } & \begin{cases}  \alpha \leq 1 & \text{does not exist} \\ 1 < \alpha \leq 2 & \infty \\ \alpha > 2 & \left( \frac{\alpha_m}{\alpha - 1} \right)^2 \frac{\alpha}{\alpha - 2} \end{cases}
+\end{align}
+
+The hazard rate of the Pareto distribution, taken after the burn-in period, falls with the dependent parameter,
+\begin{equation}
+h(t) = \frac{\alpha}{t}.
+\end{equation}
+
+\paragraph{Weibull}\label{sec:Weibull_distribution} $\\ \\$
+The Weibull distribution arises from the study of survival analysis, or hazard analysis, in which the time to failure is proportional to a power of time.  The density function takes the form,
+\begin{equation}
+\operatorname{Wei}(k, \lambda) \equiv p_{\operatorname{Wei}} (x | k, \lambda) = 
+\begin{cases}
+\frac{k}{\lambda} \left( \frac{x}{\lambda} \right)^{k-1} e^{-\left( \frac{x}{\lambda} \right)^k} & x \geq 0 \\
+0 & x < 0
+\end{cases}
+\end{equation}
+
+The lower-order moments are expressed in terms of the gamma function,
+\begin{align}
+\text{mean: } & \lambda \, \Gamma\left(1 + \frac{1}{k}\right) \\
+\text{variance: } & \lambda^2 \left[ \Gamma\left( 1 + \frac{2}{k} \right) - \left( \Gamma\left( 1 + \frac{1}{k} \right) \right)^2 \right]
+\end{align}
+
+
+
+
+\subsection{Continuous Distribution (Multivariate)} \label{sec:continuous_distributions}
+\subsubsection{Gaussian Derived Distributions}
+\paragraph{Multivariate Gaussian}\label{sec:multivariate_Gaussian_distribution} $\\ \\$
+The \textbf{multivariate Gaussian} distribution is derived from the random vector, $\mathbf{X} = (X_1, \cdots, X_n)^\top$, for which each coordinate, $X_i$, is itself a Gaussian random variable, defined by individual means and variances, and each pair of coordinates, $X_i, X_j$, is linked by the covariance of the random variables.  This information is organized as a mean vector, $\boldsymbol{\mu}$, and covariance matrix, $\boldsymbol{\Sigma}$,
+\begin{equation}\label{eq:multivariate_Gaussian_mean_covariance}
+\mathbf{X} = \begin{pmatrix} X_1 \sim \operatorname{N}(\mu_1, \sigma_1^2) \\ \vdots \\ X_n \sim \operatorname{N}(\mu_n, \sigma^2_n) \end{pmatrix} \Rightarrow
+\begin{cases}
+\boldsymbol{\mu} = \begin{pmatrix} \mathbb{E}X_1 \\ \vdots \\ \mathbb{E}X_n \end{pmatrix} = \begin{pmatrix} \mu_1 \\ \vdots \\ \mu_n \end{pmatrix}\\ \\
+\boldsymbol{\Sigma} = \begin{pmatrix} \mathbb{V} X_1 & \cdots & \mathbb{C}(X_1, X_n) \\ \vdots & \ddots & \vdots \\ \mathbb{C}(X_1, X_n) & \cdots & \mathbb{V}X_n \end{pmatrix} = \begin{pmatrix} \sigma^2_1 & \cdots & \sigma_{x_1x_n} \\ \vdots & \ddots & \vdots \\ \sigma_{x_1x_n} & \cdots & \sigma^2_n \end{pmatrix}
+\end{cases}
+\end{equation}
+Note that the covariance matrix is by construction symmetric, and is further constrained to be positive definite (\textit{cf. LAN}, $\S$3.8).  
+
+Given the mean vector and covariance matrix defined in (\ref{eq:multivariate_Gaussian_mean_covariance}), the multivariate Gaussian distribution takes the form,
+
+\begin{equation}
+\mathbf{X} \sim \operatorname{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma}) = \frac{1}{\sqrt{(2\pi)^n \det \boldsymbol{\Sigma}}} e^{-\frac{1}{2}(\mathbf{x} - \boldsymbol{\mu})^\top \boldsymbol{\Sigma}^{-1} (\mathbf{x} - \boldsymbol{\mu})}
+\end{equation}
+
+Note here that the argument of the exponential in the multivariate Gaussian is a quadratic form, for which constant surfaces form nested ellipsoids in the appropriately dimensioned space.
+
+The \textbf{standard normal} distribution is a special case of the general distribution in which the random vector is `standardized', with coordinate random variables defied by zero mean vector and indentity covariance matrix,
+
+\begin{equation}
+\mathbf{Z} \sim \operatorname{N}(\mathbf{0}, \mathbf{I}) = (2\pi)^{-\frac{n}{2}} e^{-\frac{1}{2} \mathbf{z}^\top \mathbf{z}}
+\end{equation}
+
+\paragraph{Linear Transformations of Multivariate Gaussians}\label{sec:linear_transformation_multivariate_Gaussian} $\\ \\$
+It is possible to generate every multivariate Gaussian distribution from a \textit{linear transformation} of a standard normal distribution,
+\begin{equation}\label{eq:Gaussian_linear_transformation}
+\mathbf{X} = \boldsymbol{\mu} + \boldsymbol{\Gamma} \mathbf{Z},
+\end{equation}
+frow which we derive
+\begin{equation}
+\begin{rcases}
+\mathbb{E}\mathbf{X} \equiv \mathbb{E}(\boldsymbol{\mu} + \boldsymbol{\Gamma} \mathbf{Z}) = \boldsymbol{\mu} \\
+\mathbb{V}\mathbf{X} \equiv \mathbb{E}\left(\mathbf{X} - \mathbb{E}\mathbf{X} \right) \left( \mathbf{X} - \mathbb{E} \mathbf{X} \right)^\top = \boldsymbol{\Gamma}\boldsymbol{\Gamma}^\top
+\end{rcases} \Rightarrow \mathbf{X} \sim \operatorname{N}(\boldsymbol{\mu}, \boldsymbol{\Gamma}\boldsymbol{\Gamma}^\top)
+\end{equation}
+
+Similarly we can recover the standard normal by inverting the relationship in (\ref{eq:Gaussian_linear_transformation}),
+\begin{equation}
+\mathbf{Z} = \boldsymbol{\Gamma}^{-1} (\mathbf{X} - \boldsymbol{\mu}),
+\end{equation}
+so that
+
+\begin{equation}
+\begin{rcases}
+\mathbb{E}\mathbf{Z} \equiv \mathbb{E} \boldsymbol{\Gamma}( \mathbf{X} - \boldsymbol{\mu}) = \mathbf{0} \\
+\mathbb{V}\mathbf{Z} \equiv \mathbb{E}\left(\mathbf{Z} - \mathbb{E}\mathbf{Z} \right) \left( \mathbf{Z} - \mathbb{E} \mathbf{Z} \right)^\top = \mathbb{E}\mathbf{Z}\mathbf{Z}^\top = \boldsymbol{\Gamma}^{-1} \boldsymbol{\Sigma} \boldsymbol{\Gamma}^{-\top} = \mathbf{I}
+\end{rcases} \Rightarrow \mathbf{Z} \sim \operatorname{N}(\mathbf{0}, \mathbf{I})
+\end{equation}
+
+Notice in particular that \textit{orthogonal} linear transformations convert multivariate standard normal random variables into other standard normal random variables, 
+\begin{equation}
+\mathbf{X} = Q\mathbf{Z} \Rightarrow \mathbb{V}\mathbf{X} = QIQ^\top = I.
+\end{equation}
+
+Finally, linear transformations map Gaussian random variables into other Gaussian random variables:
+
+\begin{equation}
+\mathbf{X} \sim \operatorname{N}(\boldsymbol{\mu}, \Sigma) \Rightarrow A\mathbf{X} \sim \operatorname{N}(A\boldsymbol{\mu}, A \Sigma A^\top).
+\end{equation}
+
+For transformation by symmetric matrices, $A = A^\top$, the mean vector and covariance matrix are simply updated under change of basis (\textit{cf. LAN}, $\S$3.9.3).
+
+
+\paragraph{Eigenstructure of Multivariate Gaussians}
+We can gain greater insight into the geometric properties of multivariate Gaussian distribution by examining the eigenstructure of the covariance matrix.   By the Spectral Theorem (\textit{cf. LAN}, $\S$4.2) the covariance matrix can be decomposed into a product of orthonormal and diagonal matrices,
+
+\begin{equation}
+\boldsymbol{\Sigma} = \mathbf{Q} \mathbf{D} \mathbf{Q}^\top \Rightarrow \boldsymbol{\Sigma}^{-1} = \mathbf{Q} \mathbf{D}^{-1} \mathbf{Q}^\top.
+\end{equation}
+
+The covariance matrix is invertible provided it is of full rank, which requires that the entries in the diagonal matrix, $D$, be nonzero,
+\begin{align}
+&\boldsymbol{\Sigma} = \mathbf{Q} \mathbf{D} \mathbf{Q}^\top \Rightarrow\mathbf{D} = \operatorname{diag}(\zeta_1^2, \ldots, \zeta_n^2) \\
+&\boldsymbol{\Sigma}^{-1} = \mathbf{Q} \mathbf{D}^{-1} \mathbf{Q}^\top \Rightarrow \mathbf{D}^{-1} = \operatorname{diag}\left( \frac{1}{\zeta_1^2}, \ldots, \frac{1}{\zeta_n^2} \right).
+\end{align}
+Notice that the positive-definite property has been incorporated into the specification of the diagonal matrix -- the positive entries are squared values.  We can recover the linear transformation in (\ref{eq:Gaussian_linear_transformation}) by further decomposing the diagonal matrix into a square root:
+
+\begin{equation}
+\boldsymbol{\Sigma} = \mathbf{Q} \mathbf{D} \mathbf{Q}^\top = \mathbf{Q} \mathbf{D}^\frac{1}{2} \mathbf{D}^\frac{\top}{2} \mathbf{Q}^\top =\boldsymbol{\Gamma} \boldsymbol{\Gamma}^\top \Rightarrow \boldsymbol{\Gamma} = \mathbf{Q} \mathbf{D}^{\frac{1}{2}}, \hspace{20pt} \mathbf{D}^{\frac{1}{2}} = \operatorname{diag}(|\zeta_1|, \ldots, |\zeta_n|).
+\end{equation}
+
+If we now introduce a change of basis (\textit{cf. LAN}, $\S$3.9.3) to align with the orthonormal column vectors of $Q$, then a vector in the new coordinate system, $\mathbf{y}$, adjusted to remove the mean, takes the form
+\begin{equation}
+\mathbf{y} = \mathbf{Q}^\top(\mathbf{x} -\boldsymbol{\mu}),
+\end{equation}
+and the quadratic form that makes up the argument of the exponential is expressed in coordinates that lie along the principal axes of the ellipsoids, so that the transformed covariance matrix decouples,
+\begin{equation}
+\frac{1}{2}(\mathbf{x} - \boldsymbol{\mu})^\top \boldsymbol{\Sigma}^{-1}(\mathbf{x} - \boldsymbol{\mu}) = \frac{1}{2} \mathbf{y}^\top \mathbf{D}^{-1} \mathbf{y} = \sum_{i=1}^n \frac{y_i^2}{2\zeta_i^2}
+\end{equation}
+
+Introducing the resulting change of basis into the random variable shows that the probability density function completely decouples as well,
+\begin{equation}
+\mathbf{X} \sim \operatorname{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma}) =\frac{1}{\sqrt{(2\pi)^n \det \boldsymbol{\Sigma}}} e^{-\frac{1}{2}(\mathbf{x} - \boldsymbol{\mu})^\top \boldsymbol{\Sigma}^{-1} (\mathbf{x} - \boldsymbol{\mu})}=  \prod_{i=1}^n \frac{1}{\zeta_i \sqrt{2\pi}} e^{-\frac{y_i^2}{2\zeta_i^2}} = \prod_{i=1}^n f_{\operatorname{N}}(y_i|0, \zeta_i^2).
+\end{equation}
+In the new coordinate system the joint Gaussian probability distribution is expressed simply as the product of single-variate Gaussian marginals.
+
+\paragraph{Marginal and Conditional Gaussian Distributions}\label{sec:marginal_conditional_Gaussian_distributions} $\\ \\$
+Given the $n$-dimensional multivariate Gaussian distribution, $\mathbf{X} \sim \operatorname{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma})$, we can partition the vector space in two subspaces, each of which is governed by a random distribution.  If the partition aligns with the coordinates of the original random vector, then we can also partition the mean vector and covariance matrix, so that
+\begin{equation}
+\mathbf{X} = \begin{pmatrix} \mathbf{X}_1 \\ \mathbf{X}_2 \end{pmatrix} \Rightarrow
+\begin{cases}
+\boldsymbol{\mu} = \begin{pmatrix} \boldsymbol{\mu}_1 \\ \boldsymbol{\mu}_2 \end{pmatrix} \\ \\
+\boldsymbol{\Sigma} = \begin{pmatrix} \boldsymbol{\Sigma}_{11} & \boldsymbol{\Sigma}_{12} \\ \boldsymbol{\Sigma}_{21} & \boldsymbol{\Sigma}_{22} \end{pmatrix}
+\end{cases}
+\end{equation}
+Following the discussion in $\S$\ref{sec:joint_conditional_marginal_distributions} above, we show here that the joint distribution can be expressed as the product of marginal and conditional distributions, $\mathbf{X} = \mathbf{X}_2 \, \mathbf{X}_1 | (\mathbf{X}_2 = \mathbf{x}_2)$, all of which are Gaussian in form.
+
+As a preliminary, we express the quadratic form that comprises the argument of the exponential function in block form,
+\begin{equation}
+(\mathbf{x} - \boldsymbol{\mu})^\top \boldsymbol{\Sigma}^{-1} \, (\mathbf{x} - \boldsymbol{\mu}) =
+\begin{pmatrix} \mathbf{x}_1 - \boldsymbol{\mu} \\ \mathbf{x}_2 -\boldsymbol{\mu}\end{pmatrix}^\top
+\begin{pmatrix} \boldsymbol{\Sigma}_{11} & \boldsymbol{\Sigma}_{12} \\ \boldsymbol{\Sigma}_{21} & \boldsymbol{\Sigma}_{22} \end{pmatrix}^{-1}
+\begin{pmatrix} \mathbf{x}_1 - \boldsymbol{\mu} \\ \mathbf{x}_2 - \boldsymbol{\mu} \end{pmatrix}
+\end{equation}
+using the upper Schur block (\textit{cf. LAN}, $\S$6.1) to decompose the block inverse into the product,
+\begin{equation}
+\begin{pmatrix} \boldsymbol{\Sigma}_{11} & \boldsymbol{\Sigma}_{12} \\ \boldsymbol{\Sigma}_{21} & \boldsymbol{\Sigma}_{22} \end{pmatrix}^{-1} =
+\begin{pmatrix} I_p & 0 \\ -\boldsymbol{\Sigma}_{22}^{-1} \boldsymbol{\Sigma}_{21} & I_q \end{pmatrix}
+\begin{pmatrix} \left( \boldsymbol{\Sigma}_{11} - \boldsymbol{\Sigma}_{12} \boldsymbol{\Sigma}_{22}^{-1} \boldsymbol{\Sigma}_{21} \right)^{-1} & 0 \\ 0 &  \boldsymbol{\Sigma}_{22}^{-1} \end{pmatrix}
+\begin{pmatrix} I_p & -\boldsymbol{\Sigma}_{12} \boldsymbol{\Sigma}_{22}^{-1} \\ 0 & I_q \end{pmatrix}
+\end{equation}
+which can be expanded to yield
+\begin{multline}
+(\mathbf{x} - \boldsymbol{\mu})^\top \boldsymbol{\Sigma}^{-1} (\mathbf{x} - \boldsymbol{\mu}) \\
+= \begin{pmatrix} \mathbf{x}_1 - \boldsymbol{\mu} \\ \mathbf{x}_2 -\boldsymbol{\mu} \end{pmatrix}^\top
+\begin{pmatrix} I_p \\  \boldsymbol{\Sigma}_{22}^{-1} \boldsymbol{\Sigma}_{21} \end{pmatrix}
+ \left( \boldsymbol{\Sigma}_{11} - \boldsymbol{\Sigma}_{12} \boldsymbol{\Sigma}_{22}^{-1} \boldsymbol{\Sigma}_{21} \right)^{-1}
+\begin{pmatrix} I_p \\ -\boldsymbol{\Sigma}_{12} \boldsymbol{\Sigma}_{22}^{-1} \end{pmatrix}^\top
+\begin{pmatrix} \mathbf{x}_1 - \boldsymbol{\mu} \\ \mathbf{x}_2 -\boldsymbol{\mu} \end{pmatrix}
++ ( \mathbf{x}_2 - \boldsymbol{\mu}_2 )^\top \boldsymbol{\Sigma}_{22}^{-1} (\mathbf{x}_2 - \boldsymbol{\mu}_2)
+\end{multline}
+It is a simple matter to show that the multiplicative normalizing values also split up in a similar fashion so that the joint Gaussian probability density function factors into the product of Gaussians,
+\begin{equation}
+\operatorname{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma}) = \operatorname{N}(\boldsymbol{\mu}_1 + (\mathbf{x}_2 - \boldsymbol{\mu}_2)^\top \boldsymbol{\Sigma}_{22}^{-1} \boldsymbol{\Sigma}_{21}, \boldsymbol{\Sigma}_{11} - \boldsymbol{\Sigma}_{12} \boldsymbol{\Sigma}_{22}^{-1} \boldsymbol{\Sigma}_{21}) \, \operatorname{N}(\boldsymbol{\mu}_2, \boldsymbol{\Sigma}_{22} ).
+\end{equation}
+
+This yields the desired result
+\begin{align}
+\text{Marginal Distribution:            } & \mathbf{X}_2 \sim \operatorname{N}(\boldsymbol{\mu}_2, \boldsymbol{\Sigma}_{22} )\\
+\text{Conditional Distribution:   } & \mathbf{X}_1 | (\mathbf{X}_2 = \mathbf{x}_2) \sim \operatorname{N}(\boldsymbol{\mu}_1 + (\mathbf{x}_2 - \boldsymbol{\mu}_2)^\top \boldsymbol{\Sigma}_{22}^{-1} \boldsymbol{\Sigma}_{21}, \boldsymbol{\Sigma}_{11} - \boldsymbol{\Sigma}_{12} \boldsymbol{\Sigma}_{22}^{-1} \boldsymbol{\Sigma}_{21})
+\end{align}
+
+\paragraph{Mean and Variance of Sampled IID Normal Random Variables}\label{sec:mean_variance_IID_normal} $\\ \\$
+An \textbf{IID normal random variable} is a random vector for which
+\begin{itemize}[noitemsep]
+\item each coordinate is a normal random variable;
+\item the means and variances of the coordinate random variable are identical;
+\item the covariance of the coordinate random variable is identically zero:
+\end{itemize} 
+\begin{equation}\label{eq:joint_sample_Gaussian}
+\begin{rcases}
+\mathbf{X} = (X_1, \cdots, X_m)^\top, X_i \sim \operatorname{N}(\mu, \sigma^2) \\
+\mathbf{1}_m = (1, \cdots, 1)^\top
+\end{rcases} \Rightarrow
+\mathbf{X} \sim \prod_{i=1}^m X_i = \operatorname{N}(\mu \mathbf{1}_m, \sigma^2 I_m)
+\end{equation}
+
+IID random variables are frequently used as models for sampling activities, for which the dimension of the space matches the number of sample points.  IID \textit{normal} random variables have the collective properties as summarized in \textbf{Fisher's Theorem}: the sample mean and sample variance -- \textit{cf.} $\S$\ref{sec:sample_mean_variance_single-variate} -- are independent and distributed as Gaussian and chi-square random variables, respectively.  
+
+
+\textbf{Sketch of Proof}
+
+\begin{itemize}
+\item The  mean and (unbiased) variance of the $m$ coordinates of a random vector, $\mathbf{x} = (x_1, \cdots, x_m)^\top$, are defined as
+\begin{align}
+&\hat{\mu} \mathbf{1}_m = \mathbf{1}_m \frac{1}{m} \mathbf{1}_m^\top \mathbf{x} = \mathbf{1}_m (\mathbf{1}_m^\top \mathbf{1}_m)^{-1} \mathbf{1}_m^\top \mathbf{x} = P_{\mathbf{1}_m} \mathbf{x}; \\
+&\hat{\sigma}^2 = \frac{1}{m-1} (\mathbf{x} - \hat{\mu} \mathbf{1}_m)^\top (\mathbf{x} - \hat{\mu} \mathbf{1}_m)  = \frac{1}{m-1} (\mathbf{x} - P_{\mathbf{1}_m} \mathbf{x})^\top (\mathbf{x} - P_{\mathbf{1}_m} \mathbf{x}) = \frac{1}{m-1} \mathbf{x}^\top (I_m - P_{\mathbf{1}_m}) \mathbf{x}.
+\end{align}
+Here, the vector that defines the mean and collection of vectors that define the variance lie in orthogonal subspaces.  The matrix operator, $P_{\mathbf{1}_m}$, projects vectors into the 1-dimensional subspace that contains the ones vector, while the matrix operator, $(I_m - P_{\mathbf{1}_m})$, projects vectors into the complementary orthogonal $(m-1)$-dimensional subspace.  
+
+\item There exists an orthogonal basis for which one unit vector -- say, the $m^{th}$ one -- is aligned with the sample mean vector, and the remainder lie within the complementary subspace.  A change of basis to this coordinate system is achieved by a  linear operator, the $m \times m$ matrix, $Q^\top$, so that the transformed random variable, $\mathbf{Y} = Q^\top \mathbf{X}$, takes the form
+\begin{multline}\label{eq:transformed_IID_Gaussian}
+\mathbf{Y} = (Y_1, \cdots, Y_m)^\top = Q^\top \mathbf{X} \Rightarrow \mathbf{Y} \sim \operatorname{N}(\mu Q^\top \mathbf{1}_m, \sigma^2 Q^\top I_m Q) =  \operatorname{N}(\sqrt{m} \,\mu \mathbf{e}_m, \sigma^2 I_m ), \\
+\mathbf{Y} = \prod_{i=1}^{m} Y_i \rightarrow
+\begin{cases}
+Y_1, \cdots, Y_{m-1} \sim \operatorname{N}(0, \sigma^2) \\
+\hspace{45pt}Y_m \sim \operatorname{N}(\sqrt{m} \, \mu, \sigma^2)
+\end{cases}
+\end{multline}
+
+From the presentation in $\S$\ref{sec:linear_transformation_multivariate_Gaussian} independence in multivariate Gaussian distributions is preserved under orthogonal linear transformation.
+
+\item The sample mean and variance are expressed more simply in the new coordinate system:
+
+\begin{align}
+m \hat{\mu} &\rightarrow \boldsymbol{1}_m^\top \mathbf{X} = \boldsymbol{1}_m^\top Q Q^\top \mathbf{X} = (Q^\top \boldsymbol{1}_m)^\top Q^\top \mathbf{X} = \sqrt{m} \; \mathbf{e}_m^\top \mathbf{Y} = \sqrt{m} \; Y_m \\
+(m-1)\hat{\sigma}^2 &\rightarrow \mathbf{X}^\top (I_m - P_{\boldsymbol{1}_m}) \mathbf{X} = \mathbf{X}^\top QQ^\top (I_m - P_{\boldsymbol{1}_m}) QQ^\top \mathbf{X} = (Q^\top \mathbf{X})^\top (I_m - Q^\top P_{\boldsymbol{1}_m} Q) (Q^\top \mathbf{X}) \notag \\
+&\hspace{160pt}= \mathbf{Y}^\top (I_m - \mathbf{e}_m \mathbf{e}_m^\top) \mathbf{Y} = \sum_{i=1}^{m-1} Y_i^2
+\end{align}
+
+from which the distributions of sample statistics can be immediately derived:
+
+\begin{align}
+\text{sample mean: } &\sqrt{m} \, \hat{\mu} = Y_m \sim \operatorname{N}\left(\mu, \sigma^2 \right); \\
+\text{sample variance: } &(m-1)\frac{\hat{\sigma}^2 }{\sigma^2} =  \sum_{i = 1}^{m-1} \frac{Y_i^2}{\sigma^2} = \sum_{i=1}^{m-1} Z_i^2 \sim \chi_{m-1}^2.
+\end{align}
+
+\end{itemize}
+
+Notice that information distributed homogenously in the original coordinate system -- all random variables, $X_i$, are identical -- is distributed \textit{inhomogeneously} in the transformed coordinate system in (\ref{eq:transformed_IID_Gaussian}) -- $Y_m$ is distributed differently than $Y_1, \cdots, Y_{m-1}$.  Since distinct coordinates of the transformed joint distribution contribute to the distributions of sample mean and sample variance, the two sample statistics are independent.
+
+
+
+\subsubsection{Wishart Distribution}\label{sec:Wishart_distribution}
+The \textbf{Wishart} distribution is governed by random variables of \textit{scatter matrices} formed from \textit{data matrices} sampled from zero-mean multivariate Gaussian distributions.  Wishart distributions are used to model sample covariance matrices.
+
+Given the random data matrix, $\mathcal{X}$, formed by vectors drawn $m$ times from a $p$-dimensional multivariate Gaussian distribution with mean zero and covariance matrix, $\Sigma$, 
+\begin{equation}
+\mathcal{X} = \begin{pmatrix} \mathbf{X}_1, \cdots, \mathbf{X}_m \end{pmatrix}^\top, \;\; \mathbf{X}_i \sim \operatorname{N}(\mathbf{0}, \Sigma).
+\end{equation}
+Here, the $p$-dimensional point is encoded in row vectors, while the matrix column vectors hold information on each variate.  The associated random scatter matrix, $\mathcal{S} = \mathcal{X}^\top \mathcal{X}$, then follows a Wishart distribution,
+\begin{equation}\label{eq:Wishart_pdf}
+\mathcal{S} \sim \operatorname{W}_p(\Sigma, m )\equiv f_{\operatorname{W}(\Sigma, m)}(S) =
+\frac{2^{-pm/2} \pi^{-p(p-1)/4} }{\prod_{i=1}^p \Gamma \left( \frac{m-i+1}{2} \right) }
+\frac{(\operatorname{det} S)^{(m-p-1)/2}}{(\operatorname{det} \Sigma)^{m/2}} e^{-\frac{1}{2} \operatorname{tr}(\Sigma^{-1} S)}.
+\end{equation}
+Here, the number of draws exceeds the dimension of the multivariate source, $m > p$.  
+
+To aid in the exposition in this section font and type are used to distinguish between the various quantities:
+
+\begin{itemize}[noitemsep]
+\item ordinary majuscule fonts are used for sample matrices;
+\item boldface fonts are used for vectors: majuscule for random vectors, minuscule for sample vectors;
+\item calligraphic fonts are used for random matrices.
+\end{itemize}
+
+\paragraph{Sketch of Derivation} $\\ \\$
+We start with the joint distribution of $m$ independent draws from the $p$-dimensional Gaussian distribution,
+\begin{multline}
+\mathbf{X}_i \sim \operatorname{N}(\boldsymbol{0}, \Sigma) = \frac{1}{\sqrt{(2\pi)^p \det \Sigma}} e^{-\frac{1}{2}\mathbf{x}_i^\top\Sigma^{-1} \mathbf{x}_i} \Rightarrow\\
+\mathcal{X} \sim
+\frac{(2\pi)^{-pm/2}}{(\operatorname{det} \Sigma)^{m/2}} \prod_{i=1}^{m} e^{-\frac{1}{2} \mathbf{x}_i^\top \Sigma^{-1} \mathbf{x}_i}
+=\frac{(2\pi)^{-pm/2}}{(\operatorname{det} \Sigma)^{m/2}} e^{-\frac{1}{2}  \sum_{i=1}^{m}\mathbf{x}_i^\top \Sigma^{-1} \mathbf{x}_i}.
+\end{multline}
+Given properties of the matrix trace operator, (\textit{cf. LAN}, $\S$3.10), the exponential argument can be expressed more succinctly in terms of matrices,
+\begin{equation}
+ \sum_{i=1}^{m}\mathbf{x}_i^\top \Sigma^{-1} \mathbf{x}_i = \operatorname{tr}(X \Sigma^{-1} X^\top) =  \operatorname{tr}(\Sigma^{-1} X^\top X),
+\end{equation}
+and the probability density function takes the form
+\begin{equation}\label{eq:Gaussian_data_matrix_distribution}
+\mathcal{X} \sim \frac{1}{(2\pi)^{pm/2} (\operatorname{det} \Sigma)^{m/2}} e^{-\frac{1}{2} \operatorname{tr}(\Sigma^{-1} X^\top X)}.
+\end{equation}
+
+The derivation of the Wishart distribution then follows from the change of variable
+\begin{align}
+&X: \hspace{36pt} m \times p  \text{ variables} \\
+&S = X^\top X: \frac{p(p+1)}{2} \text{ variables}
+\end{align} 
+and integrating the unconstrained variables so that, for expectation of an arbitrary function, $g$, we have
+\begin{equation}
+\int_{\mathbb{R}^{m \times p}} g(X) f_{\operatorname{N}(0, \Sigma)} (X) \; dX \rightarrow \int_{\mathbb{R}^{p(p+1)/2}} g(S) f_{\operatorname{W}(\Sigma, m)} (S) \; dS.
+\end{equation}
+
+This is achieved by the following program:
+\begin{itemize}
+\item Define the sequence of matrices
+\begin{align}
+&X_i = \begin{pmatrix} \mathbf{x}_1 &\cdots & \mathbf{x}_i \end{pmatrix} \\
+&S_i = X_i^\top X_i = 
+\begin{pmatrix} \mathbf{x}_1^\top \mathbf{x}_1 & \cdots & \mathbf{x}_1^\top \mathbf{x}_i \\ 
+\vdots & \ddots & \vdots \\
+\mathbf{x}_1^\top \mathbf{x}_i & \cdots & \mathbf{x}_i^\top \mathbf{x}_i \end{pmatrix}
+\end{align}
+
+The determinant of the $i^{th}$ scatter matrix yields the square volume of the $i$-dimensional parallelepiped enclosed by the data vectors (\textit{cf. LAN }, $\S$3.7):
+
+\begin{equation}
+V_i^2 = \operatorname{det} (X_i^\top X_i) = \operatorname{det} (S_i);
+\end{equation}
+
+\item Map the column vectors, $\mathbf{x}_i$, into a set of orthogonal vectors, $\mathbf{u}_i$ that enclose equivalent volumes via the Gram-Schmidt procedure (\textit{cf. LAN}, $\S$3.11.1).  The norm of the orthogonal vectors is given by
+\begin{equation}
+\begin{rcases}
+\mathbf{u}_1 = \mathbf{x}_1 \\
+\hspace{15pt} \vdots \\
+\mathbf{u}_i = \left( I - \sum_{j=1}^{i-1} P_{\mathbf{u}_j} \right) \mathbf{x}_i 
+\end{rcases} \Rightarrow
+|| \mathbf{u}_i ||_2 = \left( \frac{\operatorname{det}(X_i^\top X_i)}{\operatorname{det}(X_{i-1}^\top X_{i-1})} \right)^{\frac{1}{2}} = 
+ \left( \frac{\operatorname{det}(S_i)}{\operatorname{det}(S_{i-1})} \right)^{\frac{1}{2}}  =  \frac{V_i}{V_{i-1}}
+\end{equation}
+\item Partition the $m \times p$-dimensional space by variate, so that each $m$-dimensional vector is mapped into a smaller subspace spanned by the elements of the corresponding vector in the covariance matrix:
+\begin{equation}
+\begin{rcases}
+dX = \prod_{i=1}^p d \mathbf{x}_i \\
+dS = \prod_{i=1}^p d \mathbf{s}_i
+\end{rcases} \Rightarrow \mathbf{x}_i = \begin{pmatrix} dx_{1i} \\ \vdots \\ dx_{mi} \end{pmatrix} \rightarrow 
+\begin{pmatrix} ds_{1i} \\ \vdots \\ ds_{ii} \\ d\phi_{i+1,1} \\ \vdots \\ d\phi_{mi} \end{pmatrix}
+= \begin{pmatrix} d\mathbf{s}_i \\ d\boldsymbol{\phi}_i \end{pmatrix};
+\end{equation}
+\item The $m$-dimensional vector, $\mathbf{u}_i$, is orthogonal to the $(i-1)$-dimensional subspace spanned by the data vectors, $(\mathbf{x}_1, \cdots, \mathbf{x}_{i-1})$, and is constrained by the $i$  entries in the covariance vector, $\mathbf{s}_i = ( \mathbf{x}_1^\top \mathbf{x}_i, \cdots, \mathbf{x}_i^\top \mathbf{x}_i  )^\top$, to be constant on the $(m-i)$-dimensional hypersphere of radius, $||\mathbf{u}_i||_2$.  We can therefore integrate the angular coordinates, $d\boldsymbol{\phi}_i$ for a given set of data vectors, $\mathbf{x}_1, \cdots, \mathbf{x}_{i-1}$, 
+\begin{equation}
+\int d \boldsymbol{\phi}_i = \int d \phi_{i+1,i} \cdots d \phi_{mi} = A_{m-i} \left( ||\mathbf{u}||_2 \right) = A_{m-i} \left( \frac{V_i}{V_{i-1}} \right);
+\end{equation}
+\item The Jacobian of the transformation from data to scatter vectors is the reciprocal of the inverse transformation:
+\begin{multline}
+\nabla_{\mathbf{x}_i} \mathbf{s}_i = \begin{pmatrix} \mathbf{x}_1 & \cdots & \mathbf{x}_{i-1} & 2 \mathbf{x}_i \end{pmatrix} \Rightarrow \\
+J(\mathbf{x}_i, \mathbf{s}_i) = J^{-1}(\mathbf{s}_i, \mathbf{x}_i) = |\operatorname{det} \left( \nabla_{\mathbf{x}_i} \mathbf{s}_i^\top \nabla_{\mathbf{x}_i} \mathbf{s}_i \right)|^{-\frac{1}{2}} = |4 \operatorname{det} (S_i)|^{-\frac{1}{2}} = \frac{1}{2V_i}.
+\end{multline}
+
+The multiplicative factor in the Jacobian is due to the linearity of the wedge product from which the determinant is derived;
+
+\item Finally, apply Fubini's theorem so that
+\begin{equation}
+\int_{\mathbb{R}^{m \times p}} dX = \int_{\mathbb{R}^m} \left[ \cdots \left[ \int_{\mathbb{R}^m} d\mathbf{x}_p \right] \cdots \right] d\mathbf{x}_1 = \prod_{i=1}^p \frac{A_{m-i} \left( V_i / V_{i-1} \right)}{2V_i}  \int_{\mathbb{R}^{p(p+1)/2}} dS.
+\end{equation}
+\end{itemize}
+
+Substituting the formula for the surface area of hyperspheres, supplying the exponential kernel to the integral, and replacing data matrices with the scatter matrix  in (\ref{eq:Gaussian_data_matrix_distribution}) yields the form of the density function,
+\begin{equation}
+\begin{rcases}
+A_{m-i}\left( \frac{V_i}{V_{i-1}} \right) = \frac{2 \pi^{(m-i+1)/2}}{\Gamma \left( \frac{m-i+1}{2} \right)} \left( \frac{V_i}{V_{i-1}} \right)^{m-i} \\
+V_{m-p-1} = (\operatorname{det}(S))^{\frac{1}{2}}
+\end{rcases} \Rightarrow f_{\operatorname{N}(0, \Sigma)} (X) \; dX \rightarrow f_{\operatorname{W}(\Sigma, m)} (S) \; dS,
+\end{equation}
+
+as defined above in (\ref{eq:Wishart_pdf}).
+
+\subsection{The Exponential Family of Distributions}\label{sec:exponential_family}
+A large number of the common parametrized distributions introduced above in $\S\S$\ref{sec:discrete_distributions} -- \ref{sec:continuous_distributions} can be expressed in factored exponential form, for which the contributions due to the random variable and the parameter are segregated into distinct functions.  In its most-general form the single- and multivariate expressions for distributions in the \textbf{exponential family} are factored as,
+
+\begin{align}
+\text{univariate: } &p_X(x | \theta) = h(x) \exp(\eta(\theta) \, T(x) - A(\eta(\theta))), \\
+\text{multivariate: } & p_\mathbf{X}(\mathbf{x} | \boldsymbol{\theta}) = h(\mathbf{x}) \exp(\eta(\boldsymbol{\theta})^\top T(\mathbf{x}) - A(\eta(\boldsymbol{\theta}))),
+\end{align}
+
+for which the random variable and parameter are coupled in the argument of the exponential through a product of functions.  The function of the random variable, $T(X)$, is known as a \textit{statistic}, which is defined and further discussed in \textit{SN}, $\S$2.2.1.
+
+The function, $A(\eta(\theta))$, is known as the \textit{log-partition function}, from which all statistical information about the distribution can be derived.  Taking the univariate expression, for example, we can rearrange the terms in the probability density function,
+\begin{equation}
+\int_\mathbb{R}  h(x) \exp(\eta(\theta) \, T(x) - A(\eta(\theta))) dx = 1 \Rightarrow
+A(\eta(\theta)) = \ln \left( \int_\mathbb{R}  h(x) \exp(\eta(\theta) \, T(x)) dx \right).
+\end{equation}
+
+The moment-generating function for the statistic, $T(x)$, is the Laplace transform of the probability density function (\textit{cf. }$\S$\ref{sec:moment-generating_functions}),
+\begin{align}
+M_{T(x)}(u) = \mathbb{E} e^{u T(x)} &= \int_\mathbb{R} [ \exp(u T(x)) ] h(x) \exp (\eta T(x) - A(\eta)) dx = \int_\mathbb{R} h(x) \exp((\eta + u)T(x) - A(\eta))dx \notag \\
+&= \int_\mathbb{R} h(x)  \exp[(\eta + u)T(x) - A(\eta + u) + A(\eta + u) - A(\eta)] \, dx \notag \\
+&= \exp(A(\eta + u) - A(\eta)) \int_\mathbb{R} h(x)  \exp[(\eta + u)T(x) - A(\eta + u)] \, dx \notag \\
+&= \exp(A(\eta + u) - A(\eta)) \int_\mathbb{R} p_X(x | (\eta + u)) \, dx =  \exp(A(\eta + u) - A(\eta))
+\end{align}
+
+The cumulant function (\textit{cf. }$\S$\ref{sec:cumulants}) is the natural logarithm of the moment-generating function, from which the first moment and second central moment are immediately derived:
+\begin{equation}
+K_{T(x)}(u) = \ln M_{T(x)}(u) = A(\eta + u) - A(\eta) \Rightarrow
+\begin{cases}
+\mathbb{E}T(x) = \frac{d}{du} \left. K_{T(x)}(u) \right|_{u=0} \hspace{4pt} = \frac{d}{d \eta} A(\eta) \\
+\mathbb{V}T(x) = \frac{d^2}{du^2} \left. K_{T(x)}(u) \right|_{u=0} = \frac{d^2}{d \eta^2} A(\eta)
+\end{cases}
+\end{equation}
+
+Note that both moments are derivatives of the log-partition function, and is easily generalized to multivariate distributions:
+\begin{align}
+\mathbb{E}T(\mathbf{x}) &= \nabla_{\mathbf{u}} \left. K_{T(\mathbf{x})}(\mathbf{u}) \right|_{\mathbf{u}=\mathbf{0}} = \nabla_{\boldsymbol{\eta}} A(\boldsymbol{\eta}) \\
+\mathbb{C}(T(\mathbf{x}), T(\mathbf{x})) &= \nabla_{\mathbf{u}}^2 \left. K_{T(\mathbf{x})}(\mathbf{u}) \right|_{\mathbf{u}=\mathbf{0}} = \nabla_{\boldsymbol{\eta}}^2 A(\boldsymbol{\eta})
+\end{align}
+
+Finally, the set of distributions for which the parameter function and statistics are both identity maps,
+\begin{equation}
+\begin{rcases}
+\eta(\theta) = \theta \\
+T(x) = x
+\end{rcases} \Rightarrow
+p_X(x|\theta) = h(x) \exp(x\theta - A(\theta)),
+\end{equation}
+is known as the \textbf{simple exponential family}.
+
+\section{Order Statistics}\label{sec:order_statistics}
+The probability distributions of cumulative probability rank, or `percentile', of finite samples taken with replacement from \textit{arbitrary} distributions are known as \textbf{order statistics}.  The key insight is that \textit{all} ranks are distributed uniformly with respect to their cumulative distribution function.
+
+With this is mind we let a set of $n$ IID random variables, designated as $X_1, \cdots, X_n$, be sampled from a uniform distribution, $X_i \sim \operatorname{Uni}(0,1)$.  The random variables sorted in increasing order, designated as $X_{(1)}, \cdots, X_{(n)}$, 
+
+\begin{itemize}[noitemsep]
+\item $k-1$ events fall within $[0, u)$;
+\item 1 event falls within $[u + du)$;
+\item $n-k$ events fall within $[u+du, 1]$.
+\end{itemize}
+
+Treating the infinitesimal interval as finite-sized, the frequency with which each independend sample falls within each interval is governed by multinomial statistics, $\S$\ref{sec:multinomial_distribution}, 
+
+\begin{equation}
+\frac{n!}{(k-1)!1!(n-k)!}u^{k-1} \cdot du \cdot (1-u-du)^{n-k} \approx \frac{n!}{(k-1)!(n-k)!}u^{k-1} \cdot (1-u)^{n-k}\cdot du 
+\end{equation}
+
+which, in the limit of infinitesimal interval, $du$, takes the form of a cumulative distribution whose probability density is given by
+
+\begin{equation}
+X_{(k)} \sim \operatorname{B}(k, n+1-k).
+\end{equation}
+
+
+\section{Asymptotic Limits}\label{sec:asymptotic_limits}
+
+\subsection{Convergence of Random Variables}\label{sec:convergence_random_variables}
+
+Random variables, $X$, as described in $\S$\ref{sec:random_variables}, map outcomes from the probability space, $(\Omega, \mathcal{F}, \mathbb{P})$, into real values the state space, $(\mathbb{R}, \mathcal{B}, \mu)$, while the inverse map, $X^{-1}$, pulls back Borel sets from the state space into events in the probability space:
+\begin{align}
+X:& \Omega \rightarrow \mathbb{R} \\
+X^{-1} :& \mathcal{B} \rightarrow \mathcal{F}
+\end{align}
+
+Notice the difference in granularity of the forward and inverse map: the random variable applies to individual outcomes realized as a many-to-one mapping; the inverse action acts upon real sets, and cannot generally resolve individual outcomes.  
+
+Given a sequence of random variables, $X_{n \in \mathbb{N}}$, and a candidate limiting random variable, $X$, \textit{convergence} is established by applying probability measures to a selection of events with vanishing results.  However, the mathematical setting is complex and convergence can be defined in a number of ways -- one can initiate the selection of sets from either the probability space or the state space, or one can alter the sequence the limit and probability operations.  More formally we can define convergence of random variables as the following:
+
+\begin{itemize}
+\item In the \textit{inverse} sense as the selection of sets is initiated in the state space and the probability measure is applied to the sequence of events generated by the pullback:  \textbf{convergence in distribution};
+\item In the \textit{forward} sense as the selection of set is initiated in the probability space, to which the probability measure is then applied;
+ vanishing probability of the event in which the sequence and the limiting random variables differ:
+\begin{itemize}[noitemsep]
+\item \textbf{convergence in probability}: Application of the probability measure is made to each event, and convergence is demonstrated as the vanishing limit of real numbers;
+\item \textbf{convergence almost surely}: Application of the probability measure is made to a limiting set, which requires that the limiting set be an event, and convergence is demonstrated as a zero-valued measure.
+\end{itemize}
+\end{itemize}
+
+These three notions of convergence are covered briefly in the following sections.  For the most part it is a simple matter of decoding the mathematical statements.
+
+\subsubsection{Convergence in Distribution}\label{sec:convergence_in_distribution}
+
+The cumulative distribution function, $F(x)$, completely defines the operation of random variables in the state space, and serves as the probability measure of half-open infinite sets, $[-\infty, x)$.  Demonstration of convergence with respect to these sets is sufficient to establish convergence with respect to any Borel set.  The pullback of the half-open set by the random variables, $X_n$, is represented as
+
+\begin{equation}
+  X^{-1}[-\infty, x) = \{ \omega \in \Omega : X(\omega) < x \} \equiv \{ X < x \}
+\end{equation}
+
+Convergence in distribution is established in a few steps:
+\begin{itemize}[noitemsep]
+\item Generate the events that correspond to each random variable in the sequence: $\{ X_n < x \}$
+\item Calculate the probability of each event: $\mathbb{P} \{ X_n < x \}$
+\item Equate the limiting probability to the probability of the candidate random variable:
+\end{itemize}
+\begin{equation}\label{eq:convergence_in_distribution}
+\lim_{n\rightarrow \infty} \mathbb{P}\{X_n < x\} = \mathbb{P}\{X < x\} \Leftrightarrow X_n \stackrel{d}{\longrightarrow} X
+\end{equation}
+
+Notice that the limit is applied to real values, and that the relation in (\ref{eq:convergence_in_distribution}) must hold for all $x$.
+
+\subsubsection{Convergence in Probability (Weak Convergence)}\label{sec:convergence_in_probability}
+
+We start with the set of all outcomes for which the absolute difference between mappings, for an arbitrary random variable in the sequence, $X_n$, and the target random variable, $X$, exceeds a threshold, $\epsilon > 0$,
+
+\begin{equation}\label{eq:difference_set}
+\{ \omega \in \Omega : |X_n(\omega) - X(\omega)| > \epsilon \} \equiv \{| X_n - X| > \epsilon \} 
+\end{equation}
+
+Then convergence in probability is established in a few steps:
+\begin{itemize}[noitemsep]
+\item Generate the difference event for each random variable: $\{| X_n - X| > \epsilon \}$ 
+\item Calculate the probability of each event: $\mathbb{P}\{| X_n - X| > \epsilon \}$
+\item Assert the probability vanishes in the limit for all $\epsilon > 0$:
+\end{itemize}
+\begin{equation}
+\lim_{n\rightarrow \infty} \mathbb{P}\{|X_n - X| > \epsilon\} = 0 \Leftrightarrow X_n \stackrel{p}{\longrightarrow} X.
+\end{equation}
+
+As with convergence in distribution, convergence in probability is a statement about the vanishing limit of real numbers.
+
+\subsubsection{Convergence Almost Surely (Strong Convergence)}\label{sec:convergence_almost_surely}
+
+Similar to convergence in probability, convergence almost surely starts with the sequence of difference sets defined in (\ref{eq:difference_set}).  However, the order of limit and measure operations is interchanged.  The limit of a sequence of sets is best interpreted as the limit superior, defined as
+
+\begin{equation}
+\limsup_{n\rightarrow \infty}\{  |X_n - X| > \epsilon \} = \bigcap_{n\in\mathbb{N}} \bigcup_{m \geq n} \{ \omega \in \Omega : |X_m(\omega) - X(\omega)| > \epsilon \}.
+\end{equation}
+
+The order of unions and intersections ensures that all outcomes that appear in an infinite number of sets in the sequence are assigned to the limiting set.  Convergence almost surely then follows from applying the probability measure to the limiting set, and asserting the result vanishes for all $\epsilon > 0$,
+
+\begin{equation}
+\mathbb{P} \limsup_{n\rightarrow \infty} \{  |X_n - X| > \epsilon \} = 0 \Leftrightarrow X_n \stackrel{as}{\longrightarrow} X.
+\end{equation}
+
+There is a subtlety here: the set of events, $\mathcal{F}$, must be complete, and contain the limiting set, which may not be the case!
+
+\subsubsection{Functions of Convergent Random Variables}\label{sec:functions_convergent_random_variables}
+The \textbf{Continuous Mapping Theorem}:
+
+\begin{equation}
+\begin{rcases}
+g \text{  is a }\textit{continuous} \text{ function} \\
+X_n \stackrel{d}{\longrightarrow} X
+\end{rcases} \Rightarrow
+g(X_n) \stackrel{d}{\longrightarrow} g(X).
+\end{equation}
+
+\subsubsection{Product of Convergent Random Variables}\label{sec:product_convergent_random_variables}
+\textbf{Slutsky's Theorem}\label{sec:Slutskys_theorem}:
+
+\begin{equation}
+\begin{rcases}
+X_n \stackrel{d}{\longrightarrow} X \\
+Y_n \stackrel{p}{\longrightarrow} c
+\end{rcases} \Rightarrow
+X_nY_n \stackrel{d}{\longrightarrow} cX
+\end{equation}
+
+Note that the convergence of the product holds \textit{only} if the limit of one is a constant. 
+
+\subsection{Asymptotic Limits of IID Samples}\label{sec:asymptotic_limits_IID_samples}
+
+\subsubsection{Law of Large Numbers}\label{sec:law_of_large_numbers}
+Given a random variable, $X$, with finite mean and variance,
+\begin{align}\label{eq:iid_moments}
+\mathbb{E}X &= \mu; \\
+ \mathbb{V}X &= \sigma^2;
+\end{align}
+
+and a collection of independent, identically distributed random variables, $X_{i\in\mathbb{N}} \sim X$, the sample mean and variance of the collection are given by
+
+\begin{equation}
+\bar{X}_n = \frac{1}{n} \sum_{i=1}^n X_i \Rightarrow
+\begin{cases}
+\mathbb{E}\bar{X}_n = \mathbb{E} \left(\frac{1}{n} \sum_{i=1}^n X_i\right) = \frac{1}{n} \sum_{i=1}^n \mathbb{E} X_i = \mu; \\
+\mathbb{V}\bar{X}_n = \mathbb{V} \left(\frac{1}{n} \sum_{i=1}^n X_i\right) = \frac{1}{n^2} \sum_{i=1}^n \mathbb{V}X_i = \frac{\sigma^2}{n}.
+\end{cases}
+\end{equation}
+
+due to the linearity of the expectation operator.  Furthermore, the asymptotic distribution of sample mean can be proved to converge in both weak and strong senses to the mean,
+
+\begin{align}
+\textbf{Weak Law of Large Numbers      } \hspace{15pt} \bar{X}_n \stackrel{p}{\longrightarrow} \mu; \\
+\textbf{Strong Law of Large Numbers    } \hspace{15pt} \bar{X}_n \stackrel{as}{\longrightarrow} \mu.
+\end{align}
+
+The weak law can be shown as a simple consequence of Chebyshev's Inequality (see $\S$\ref{sec:Chebyshevs_inequality}).  Set $g(X) = |\bar{X}_n - \mu|$, then
+
+\begin{equation}
+\mathbb{P}\{|\bar{X}_n - \mu| \geq \epsilon\} = \mathbb{P}\{ (\bar{X}_n - \mu)^2 \geq \epsilon^2 \}\leq \frac{\sigma^2}{n \epsilon^2} \Rightarrow \lim_{n\rightarrow\infty} \mathbb{P}\{|\bar{X}_n - \mu| \geq \epsilon\} = 0,
+\end{equation}
+
+which is the condition for convergence in probability.
+
+It is also possible to use Chebyshev's Inequality to prove the strong law, but this requires use of tools from Lebesgue integration.
+
+\subsubsection{Central Limit Theorem}\label{sec:central_limit_theorem}
+Whereas the law of large numbers assures us that the distribution of the sample mean approaches the population mean of the underlying distributions, the \textbf{central limit theorem} provides asymptotic estimates on the \textit{rate} of convergence.
+
+\paragraph{Univariate Theorem}\label{sec:univariate_central_limit_theorem}
+Given a random variable, $X$, with mean and variance, $\mu$ and $\sigma^2$, respectively, and a collection of independent, identically distributed random variables, $X_{i\in\mathbb{N}} \sim X$, the scaled sample mean converges in distribution to the standard normal,
+\begin{equation}
+\frac{\sqrt{n} (\bar{X}_n - \mu)}{\sigma} \stackrel{d}{\longrightarrow} \operatorname{N}(0,1).
+\end{equation}
+
+The characteristic equation, as described above in $\S$\ref{sec:characteristic_functions}, provides a ready proof of the theorem.  Given the definition of the sample mean, we construct the sum of scaled variables,
+\begin{equation}
+\bar{X}_n = \frac{1}{n} \sum_{i=1}^n X_i \Rightarrow \frac{\sqrt{n}(\bar{X}_n - \mu)}{\sigma} = \sum_{i=1}^n \frac{X_i - \mu}{\sigma \sqrt{n}}
+\Rightarrow \begin{cases}
+\mathbb{E}\left( \frac{X_i -\mu}{\sigma \sqrt{n}} \right) = 0 \\
+\mathbb{E}\left( \frac{X_i -\mu}{\sigma \sqrt{n}} \right)^2 = \frac{1}{n},
+\end{cases}
+\end{equation}
+along with the mean and variance of each contribution to the sum.  The characteristic function for any one of the collection is given by
+\begin{equation}
+\phi_{X}(t) = 1 + it\mathbb{E}X - \frac{t^2}{2}\mathbb{E}X^2 + \cdots 
+\Rightarrow
+\phi_{\frac{X_i - \mu}{\sigma \sqrt{n}}}(t) = 1 - \frac{t^2}{2n} + \mathcal{O} \left( n^{-\frac{3}{2}} \right)
+\end{equation}
+and the full collection to leading order is given by,
+\begin{equation}
+\phi_{\sum_{i=1}^n \frac{X_i - \mu}{\sigma \sqrt{n}}}(t) = \prod_{i=1}^n \phi_{\frac{X_i - \mu}{\sigma \sqrt{n}}}(t)  = \prod_{i=1}^n \left( 1 - \frac{t^2}{2n} + \mathcal{O} \left( n^{-\frac{3}{2}} \right) \right).
+\end{equation}
+Finally, noting that the limit yields an exponential function, whose form matches the characteristic function of the standard normal distribution,
+\begin{equation}
+\lim_{n\rightarrow\infty} \prod_{i=1}^n \left( 1 - \frac{t^2}{n} + \mathcal{O} \left( n^{-\frac{3}{2}} \right) \right) = \lim_{n\rightarrow\infty} \left( 1 - \frac{t^2}{n} + \mathcal{O} \left( n^{-\frac{3}{2}} \right) \right)^n = e^{-\frac{t^2}{2}} = \phi_{\operatorname{N}(0,1)}(t).
+\end{equation}
+
+\paragraph{Multivariate Theorem}\label{sec:multivariate_central_limit_theorem}  The multivariate version of the central limit theorem is a straightforward generalization of the univariate case.  Given the mean vector and covariance matrix of a random variable, $\mathbf{X}$,
+\begin{align}
+\mathbb{E}\mathbf{X} &= \boldsymbol{\mu}; \\
+\mathbb{V} \mathbf{X}  &= \mathbb{E} \mathbf{X} \mathbf{X}^\top - \mathbb{E}\mathbf{X} \,\mathbb{E}\mathbf{X}^\top = \boldsymbol{\Sigma};
+\end{align}
+the asymptotic distribution of the sample mean approaches a normal distribution,
+\begin{equation}
+\bar{\mathbf{X}}_n = \frac{1}{n} \sum_{i = 1}^n \mathbf{X}_i \Rightarrow
+\sqrt{n} (\bar{\mathbf{X}}_n - \boldsymbol{\mu}) \stackrel{d}{\longrightarrow} \operatorname{N}(\mathbf{0}, \boldsymbol{\Sigma}),
+\end{equation}
+whose covariance matrix matches the underlying distribution.
+
+For any given function of a multivariate random variable, $g(\mathbf{X})$, we can construct a related asymptotic distribution, via the \textbf{delta method},
+\begin{equation}
+\begin{rcases}
+\mathbb{E}g(\mathbf{X}) = g(\boldsymbol{\mu}) \\
+\mathbb{V}g(\mathbf{X}) \approx \nabla g(\boldsymbol{\mu})^\top \boldsymbol{\Sigma} \nabla g(\boldsymbol{\mu})
+\end{rcases} \Rightarrow
+\sqrt{n} \left(g(\mathbf{X}_n) - g(\boldsymbol{\mu}) \right) \stackrel{d}{\longrightarrow} \operatorname{N} \left( \mathbf{0}, \nabla g(\boldsymbol{\mu})^\top \boldsymbol{\Sigma} \nabla g(\boldsymbol{\mu}) \right).
+\end{equation}
+
+Applying the delta method to a linear transmformation, $g(\mathbf{X}) = \Gamma \mathbf{X}$, yields
+\begin{equation}
+\begin{rcases}
+\mathbb{E}g(\mathbf{X}) = \Gamma \boldsymbol{\mu} \\
+\mathbb{V}g(\mathbf{X}) = \Gamma^\top \boldsymbol{\Sigma} \Gamma
+\end{rcases} \Rightarrow
+\sqrt{n} \Gamma \left(\mathbf{X}_n - \boldsymbol{\mu}) \right) \stackrel{d}{\longrightarrow} \operatorname{N} \left( \mathbf{0}, \Gamma^\top \boldsymbol{\Sigma} \Gamma) \right).
+\end{equation}
+
+
+
+\section{Likelihood Function and Information Measures}\label{sec:likelihood_function_information_measures}
+
+\subsection{Thermodynamic Entropy}\label{sec:thermodynamic_entropy}
+
+The origins of information theory lie in thermodynamics, in which the multinomial arrangements of identical particles -- a \textbf{macrostate} -- are assigned values that depend on the number of permutations -- each a \textbf{microstate}.  For a given physical system the microstates are defined by distinct energy levels, while possible macrostates are constrained by the total energy.  In particular the \textbf{physical entropy} of the dominant macrostate can be identified with the \textit{logarithm} of the number of microstates, for which the linear extensibility of physical entropy is a consequence.
+
+\subsection{Shannon Information and Entropy}\label{sec:Shannon_information}
+
+The link between physical entropy and probability theory for the \textbf{microcanonical} assembly described in $\S$\ref{sec:thermodynamic_entropy} is furnished by the equivalence between indistinguishability of particles and the equal probability of permutations.  For a physical system of interacting particles, the macrostate that maximizes entropy -- the one with the greatest number of microstates -- is interpreted as the \textit{most probable} to be observed at any given time.  And since energy is exchanged during interactions, the instantaneous macrostates fluctuate about the maximum-entropy state, with the size of the excursions an inverse function of the number of particles in the multinomial permutations.
+
+As the number of particles increases, the observations of macroscopic phenomena are dominated by a \textit{single} most-probable macrostate, which becomes sharp in the limit. Given a random variable, $X$, the limiting microcanonical entropy is identified with the \textbf{Shannon information},
+
+\begin{equation}\label{eq:Shannon_information}
+\mathbb{I}_S X = -\ln\mathbb{P}_X.
+\end{equation}
+
+For distinct mappings of the random variable the Shannon information varies by the logarithm of the probability measure, which can be thought of as due to the indistinguishability -- and equal `probability' -- of the underlying outcomes that are collected in the density, $\mathbb{P}_X$.  Since information can be linearly combined, the \textit{global} information, or \textbf{Shannon entropy}, is captured by the expectation of Shannon information,
+
+\begin{equation}\label{eq:Shannon_entropy}
+\mathbb{H}X \equiv \mathbb{E}\mathbb{I}_S X = \int_{-\infty}^\infty p_X(x) \ln p_X\,dx.
+\end{equation}
+
+An alternative interpretation of information and entropy comes from coding theory, in which discrete random variables are efficiently encoded in bits. Here, information in the multinomial arrangements of bits is provided by the number required to represent the ensemble, which is provided by the logarithm.
+
+A common application of Shannon entropy is to estimate the form of a distribution consistent with a finite set of measurements.  The basic idea is that the `true' distribution is one that is both
+
+\begin{itemize}[noitemsep]
+\item consistent with the measurements;
+\item evenly distributed (maximizes `disorder') otherwise.
+\end{itemize}
+
+\subsection{Joint Entropy Measures}
+
+There are a number of quantities derived from information and entropy that measure the relation between two different random variables, which are taken up in the next few sections.
+
+\subsubsection{Relative Entropy (Kullback-Leibler Divergence)}\label{sec:Kullback-Leibler_divergence}
+
+The \textbf{relative entropy} between random variables, $X$ and $Y$, is given by
+
+\begin{equation}
+D_{\text{KL}}(X||Y) \equiv \mathbb{H}X - \mathbb{H}_X Y = -\int_{-\infty}^{\infty} p_X (x) \ln \frac{p_X (x)}{p_Y(x)}\,dx.
+\end{equation}
+
+The relative entropy is defined as the difference between the entropy of the random variable, $X$, and the expection  with respect to $X$ of the information in $Y$. If the two random variables coincide, the relative entropy is zero; otherwise, by Jensen's Inequality, the relative entropy must be positive:
+
+\begin{equation}
+D_{\text{KL}}(X||Y) = -\int_{-\infty}^{\infty} p_X (x) \ln \frac{p_X (x)}{p_Y(x)}\,dx  \geq -\ln\left( \int_{-\infty}^{\infty} p_X (x) \frac{p_X (x)}{p_Y(x)}\,dx\right) = -\ln \int_{-\infty}^{\infty}p_Y (x)\,dx = 0.
+\end{equation}
+
+The relative entropy is interpreted as a measure of the error introduced by substituting the random variable, $Y$, for cases in which $X$ is correct.  Notice also that the relative entropy is \textit{not} symmetric in $X$ and $Y$, and the relative entropy of $Y$ with respect to $X$ is generally different for the relative entropy of $X$ with respect to $Y$.
+\subsubsection{Conditional Entropy}\label{sec:conditional_entropy}
+
+The \textbf{conditional entropy} the random variable, $X|Y$, is provided by the linear combination of the entropy of the joint distribution less the entropy in the conditional variable,
+
+\begin{equation}
+\mathbb{H}(X|Y) = \mathbb{H}(X,Y) - \mathbb{H}Y.
+\end{equation}
+\subsubsection{Mutual Information}\label{sec:mutual_information}
+
+The \textbf{mutual information} between the random variables, $X$ and $Y$, can be expressed either in terms of entropy or in terms of the Kullback-Leibler divergence,
+
+\begin{equation}
+\mathbb{I}_M(X,Y) = \mathbb{H}X + \mathbb{H}Y - \mathbb{H}(X,Y) = D_{\text{KL}}\left( (X,Y) ||\, XY \right) = \mathbb{E}_Y D_{\text{KL}}\left( X|Y ||\, X \right).
+\end{equation}
+
+Notice that, unlike relative entropy, mutual information is symmetric with respect to the random variables that comprise the joint distribution.  Mutual information measures the `overlap' entropy between the two variables that make up the joint distribution.  For independent random variables the mutual information is the sum of the entropy in each.
+
+\subsection{Likelihood Function and Fisher Information}\label{sec:likelihood_function_Fisher_information}
+
+In the definitions of Shannon information and entropy, in (\ref{eq:Shannon_information}) and (\ref{eq:Shannon_entropy}), respectively, it is clear that information is a local property -- a value defined at a single point in the domain -- while entropy is a global one that summarizes the full distribution.  A family of random variables defined over a parameter has, in some sense, local information encoded not only in the density function, but also in the change of densities due to change in the parameter.  
+
+Let the IID random vector, $\mathbf{X} = (X_1, \cdots, X_n)$, model the sampling distribution as described above in $\S$\ref{sec:independent_joint_distributions}, with the additional requirement that the coordinate random variables be governed by a parameter, $X_i \sim X | \theta$.  The joint probability distribution for the sample is given by the function, $p_{\mathbf{X}}(\mathbf{x}|\theta)$,  and the \textbf{likelihood function}, $L(\theta | \mathbf{x})$, given that $\mathbf{X} = \mathbf{x}$ is observed, is defined as
+
+\begin{equation}\label{eq:likelihood_definition}
+L(\theta | \mathbf{x}) \equiv p_{\mathbf{X}}(\mathbf{x} | \theta)
+\end{equation}
+
+The \textbf{log-likelihood function} is identical to the Shannon information for parametrized distributions, so that
+
+\begin{equation}\label{eq:log_likelihood_definition}
+\ln L(\theta | \mathbf{x}) = \ln p_{\mathbf{X}}(\mathbf{x} | \theta) = \ln \mathbb{P}\mathbf{X}_{\theta} = -\mathbb{I}_S\mathbf{X}_{\theta}.
+\end{equation}
+
+Since the samples are independent, the Shannon information is additive, equal to the sum of information in each measurement,
+
+\begin{equation}
+L(\theta | \mathbf{x}) \equiv p_{\mathbf{X}}(\mathbf{x} | \theta) = \prod_{i=1}^n p_X(x_i|\theta) \Rightarrow \ln L(\theta | \mathbf{x}) = \sum_{i=1}^n \ln p_X(x_i | \theta).
+\end{equation}
+
+\subsubsection{The Distinction between Probability and Likelihood}\label{sec:distinction_between_likelihood_probability}
+Although similar in appearance, the likelihood function, $L(\theta | \mathbf{x})$, is \textit{not} a probability distribution for $\theta$ -- it is rather, from the definition in (\ref{eq:likelihood_definition}), equivalent to the distribution of the sample, $\mathbf{x}$.  Take, for example, the binomial distribution described in $\S$\ref{sec:Bernoulli_distribution}, 
+
+\begin{equation}
+\operatorname{Bin}(n, \theta) \rightarrow p_{\operatorname{Bin}}(k | n, \theta) = \binom{n}{k} \theta^k (1-\theta)^{n-k},
+\end{equation}
+
+which is a discrete distribution for the number of successes, $k$, expected from $n$ draws, for which each draw has a probability of success, $\theta$.  The likelihood function,
+
+\begin{equation}
+L(\theta | n, k) = \binom{n}{k} \theta^k (1-\theta)^{n-k},
+\end{equation}
+
+is \textit{not} a probability function for the parameter.  There \textit{is} a continuous probability function in $\theta$ with a similar form -- this is the Beta distribution described in $\S$\ref{sec:beta_distribution},
+
+\begin{equation}
+\operatorname{B}(\alpha, \beta) \Rightarrow p_{\operatorname{B}}(\theta | \alpha, \beta) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha)\Gamma(\beta)} \theta^{\alpha - 1} (1-\theta)^{\beta-1}.
+\end{equation}
+
+We can align the forms of the two probability distributions by identifying parameters, using the \\ combinatorial-Beta relation in (\ref{eq:combinatorial_beta_relation}), and expressing both probability distributions in terms of the parameters, $k$ and $n$,
+\begin{equation}
+\begin{rcases}
+\alpha = k + 1 \\
+\beta = n - k + 1
+\end{rcases} \Rightarrow
+\begin{cases}
+\text{probability in successes: } &  p_{\operatorname{Bin}}(k | n, \theta) = \binom{n}{k} \theta^k (1-\theta)^{n-k} \\
+\text{probability in parameter: } & p_{\operatorname{B}}(\theta | k + 1, n - k + 1) = (n + 1) \binom{n}{k} \theta^{k} (1-\theta)^{n-k}
+\end{cases}
+\end{equation}
+
+which makes clear the distinction between the two.
+
+\subsubsection{Fisher Information}\label{sec:Fisher_information}
+
+The \textbf{score function}, $S(\theta | \mathbf{x})$, measures the sensitivity of the likelihood function to changes in the parameter value,
+
+\begin{equation}
+S(\theta | \mathbf{x}) = \frac{\partial}{\partial \theta} \ln L(\theta | \mathbf{x}) = \frac{\partial}{\partial \theta} \ln p(\mathbf{x} | \theta) = \frac{1}{p(\mathbf{x} | \theta)} \frac{\partial}{\partial \theta} p(\mathbf{x} | \theta),
+\end{equation}
+
+which is the derivative with respect to the parameter of the Shannon information in the joint distribution.
+
+Given the two integration identities,
+
+\begin{align}
+&\int_D p \frac{\partial}{\partial \theta} \ln p\,d\mathbf{x} = \int_D \frac{\partial}{\partial \theta} p\,d\mathbf{x} = \frac{\partial}{\partial \theta} \int_D p\,d\mathbf{x} = 0 \\
+&\int_D p \left( \frac{\partial}{\partial \theta} \ln p \right)^2\,d\mathbf{x} = \int_D \frac{1}{p} \left( \frac{\partial p}{\partial \theta} \right)^2\,d\mathbf{x} = \int_D \left( \frac{\partial^2 p}{\partial \theta^2} - p \frac{\partial^2}{\partial \theta^2} \ln p \right)\,d\mathbf{x} = -\int_D p \frac{\partial^2}{\partial \theta^2} \ln p\,d\mathbf{x}
+\end{align}
+
+we can calculate the expection and variance of the score function:
+
+\begin{align}
+&\mathbb{E}_\theta S(\theta | \mathbf{X}) = 0 \\
+&\mathbb{V}_{\theta} S(\theta | \mathbf{X}) = \mathbb{E}_\theta S(\theta | \mathbf{X})^2 - \left( \mathbb{E}_\theta S(\theta | \mathbf{X}) \right)^2 = \mathbb{E}_\theta S(\theta | \mathbf{X})^2 = -\mathbb{E}_{\theta} \left( \frac{\partial}{\partial \theta} S(\theta | \mathbf{X}) \right)
+\end{align}
+
+Note that the expection of the score function, which is a kind of global property assigned point-wise, vanishes.  The variance of the score function is known as \textbf{Fisher information}, defined formally as
+
+\begin{equation}\label{eq:Fisher_information}
+\mathbb{I}_F \mathbf{X}_{\theta} = \mathbb{V} S(\theta | \mathbf{X}) = -\mathbb{E}_{\theta} \left( \frac{\partial}{\partial \theta} S(\theta | \mathbf{X}) \right) = -\mathbb{E}_\theta \frac{\partial^2}{\partial \theta^2} \ln p(\mathbf{X} | \theta).
+\end{equation}
+
+Therefore, the Fisher information describes the (local) change in (global) Shannon entropy as the parameter undergoes an infinitesimal change.   Expanding the joint log-likelihood function into a power series in the parameter, via Taylor's theorem, yields
+\begin{equation}
+\ln L(\theta + \Delta \theta | \mathbf{x}) \approx \ln L(\theta | \mathbf{x}) + \frac{\partial}{\partial \theta} \ln L(\theta | \mathbf{x}) \Delta\theta + \frac{1}{2} \frac{\partial^2}{\partial \theta^2} \ln L(\theta | \mathbf{x})\, \Delta\theta^2,
+\end{equation}
+
+and applying the expectation operator to the result,
+
+\begin{align}
+-\mathbb{E}_\theta \ln L(\theta + \Delta \theta | \mathbf{X}) &\approx -\mathbb{E}_\theta \left( \ln L(\theta | \mathbf{X})  + \frac{\partial}{\partial \theta} \ln L(\theta | \mathbf{X})  \Delta \theta + \frac{1}{2} \frac{\partial^2}{\partial \theta^2} \ln L (\theta | \mathbf{X}) \Delta \theta^2 \right) \notag \\
+&= \mathbb{E}_\theta \mathbb{I}_S \mathbf{X}_\theta - \mathbb{E}_\theta S(\theta | \mathbf{X}) \Delta \theta + \frac{1}{2} \mathbb{E}_\theta \left( \frac{\partial}{\partial \theta} S(\theta | \mathbf{X}) \right) \Delta \theta^2 \notag \\
+\mathbb{H} \mathbf{X}_{\theta + \Delta \theta} &\approx \mathbb{H} \mathbf{X}_\theta + \frac{1}{2} \mathbb{I}_F \mathbf{X}_\theta \Delta \theta^2
+\end{align}
+
+shows that Fisher information provides the estimate of the second-order global change in entropy given changes in the local parameter value.
+
+A quick calculation shows that this is identical to the Kullback-Leibler divergence applied to nearby values of the parameter, $\theta$,
+
+\begin{align}
+D_{\text{KL}} \left( L(\theta | \mathbf{x}) || L(\theta + \Delta \theta | \mathbf{x}) \right) &= \int_{\Theta}  L(\theta | \mathbf{x}) \ln \frac{L(\theta | \mathbf{x})}{ L(\theta + \Delta \theta | \mathbf{x})}\,d\theta \notag \\
+&= \int_{\Theta} L(\theta | \mathbf{x}) \left( \ln L(\theta | \mathbf{x}) - \ln L(\theta + \Delta \theta | \mathbf{x}) \right)\,d\theta \notag \\
+&\approx \int_{\Theta} L(\theta | \mathbf{x}) \left( -\frac{\partial}{\partial \theta} \ln L(\theta | \mathbf{x}) \Delta\theta - \frac{1}{2} \frac{\partial^2}{\partial \theta^2} \ln L(\theta | \mathbf{x}) \Delta\theta^2 \right)\,d\theta \notag \\
+&= -\mathbb{E}_\theta S(\theta | \mathbf{X})\, \Delta \theta - \frac{1}{2}\mathbb{E}_\theta \frac{\partial}{\partial \theta} S(\theta | \mathbf{X})\, \Delta \theta^2 \notag \\
+&= \frac{1}{2} \mathbb{I}_F \mathbf{X}_\theta\, \Delta \theta^2
+\end{align}
+
+and the Taylor expansion of log-likelihood can be equivalently expressed as
+
+\begin{equation}
+\mathbb{H} \mathbf{X}_{\theta + \Delta \theta} \approx \mathbb{H} \mathbf{X}_\theta + D_{\text{KL}} \left( L(\theta | \mathbf{x}) || L(\theta + \Delta \theta | \mathbf{x}) \right) .
+\end{equation}
+
+\subsubsection{Multidimensional Fisher Information}\label{sec:multidimensional_Fisher_information}
+
+The ideas on Fisher information in $\S$\ref{sec:Fisher_information} are readily extended to the case for which the parameters are multidimensional, expressed as the vector, $\boldsymbol{\theta} = (\theta_1, \cdots, \theta_m)^\top$, and the joint random variable expressed as $\mathbf{X}_{\boldsymbol{\theta}}$.  Here, the \textbf{Fisher information matrix} is given by
+
+\begin{equation}
+\mathbb{I}_F \mathbf{X}_{\boldsymbol{\theta}} \equiv -\mathbb{E}_{\boldsymbol{\theta}} \nabla^2 \ln p(\mathbf{X} | \boldsymbol{\theta}) = 
+-\mathbb{E}_{\boldsymbol{\theta}}
+\begin{pmatrix} 
+\frac{\partial^2}{\partial \theta_1^2} \ln p(\mathbf{X} | \boldsymbol{\theta}) & \cdots & \frac{\partial^2 }{\partial \theta_1 \partial \theta_m} \ln p(\mathbf{X} | \boldsymbol{\theta}) \\
+\vdots & \ddots & \vdots \\
+ \frac{\partial^2 }{\partial \theta_m \partial \theta_1} \ln p(\mathbf{X} | \boldsymbol{\theta}) & \cdots & \frac{\partial^2}{\partial \theta_m^2} \ln p(\mathbf{X} | \boldsymbol{\theta}) \\
+\end{pmatrix}
+\end{equation}
+
+for which the univariate second-order derivative in (\ref{eq:Fisher_information}) is replaced by the Laplacian operator, and the scalar result replaced by a matrix.
+
+Also, as in the univariate case, the multidimensional Taylor expansion of the log-likelihood function,
+
+\begin{equation}
+\ln L(\boldsymbol{\theta} + \Delta \boldsymbol{\theta} | \mathbf{x}) \approx \ln L(\boldsymbol{\theta} | \mathbf{x}) + \Delta \boldsymbol{\theta}^\top \ln L(\boldsymbol{\theta} | \mathbf{x}) + \frac{1}{2} \Delta \boldsymbol{\theta}^\top H \ln L(\boldsymbol{\theta} | \mathbf{x}) \Delta \boldsymbol{\theta}
+\end{equation}
+
+leads to an identical relation and interpretation between Shannon entropy and Fisher information,
+
+\begin{equation}
+\mathbb{H} \mathbf{X}_{\boldsymbol{\theta} + \Delta \boldsymbol{\theta}} \approx \mathbb{H} \mathbf{X}_{\boldsymbol{\theta}} + \Delta \boldsymbol{\theta}^\top \frac{1}{2} \mathbb{I}_F \mathbf{X}_\theta \Delta \boldsymbol{\theta}.
+\end{equation}
+
+And again, as in the univariate case, the Kullback-Leibler divergence,
+
+\begin{equation}
+D_{\text{KL}} \left( L(\boldsymbol{\theta} | \mathbf{x}) || L(\boldsymbol{\theta} + \Delta \boldsymbol{\theta} | \mathbf{x}) \right) =  \Delta \boldsymbol{\theta}^\top \frac{1}{2} \mathbb{I}_F \mathbf{X}_{\boldsymbol{\theta}}\, \Delta \boldsymbol{\theta}
+\end{equation}
+
+supplies the value of the second-order correction,
+
+\begin{equation}
+\mathbb{H} \mathbf{X}_{\boldsymbol{\theta} + \Delta \boldsymbol{\theta}} \approx \mathbb{H} \mathbf{X}_{\boldsymbol{\theta}} + D_{\text{KL}} \left( L(\boldsymbol{\theta} | \mathbf{x}) || L(\boldsymbol{\theta} + \Delta \boldsymbol{\theta} | \mathbf{x}) \right).
+\end{equation}
+
+\subsubsection{Statistical Applications of Likelihood and Fisher Information}\label{sec:statistical_applications_likelihood_Fisher_information}
+\textbf{Parameter estimation} is a major application for likelihood functions and Fisher information.  Here, the problem is to estimate the parameter, $\theta$, that governs a random variable, $X | \theta$, from a finite set of measurements, $x_1, \cdots, x_n$, each independently sampled from the distribution, $X_i \sim X \equiv X | \theta$.  Roughly speaking, the parameter affects the likelihood of measurements, and the best estimate can be gained by determining the parameter value that maximizes the formal likelihood defined in (\ref{eq:likelihood_definition}) or, more typically, the log-likelihood defined in (\ref{eq:log_likelihood_definition}).  Since the log-likelihood function is identical to the entropy for the parametrized distribution, the estimate generated by maximizing likelihood is equivalent one generated by maximizing entropy.
+
+In the presence of ever-increasing information it is possible to show that the maximum-likelihood estimator described above is asymptotically normal, approaching the true value of the parameter with a covariance defined by the Fisher information, or the Fisher information matrix in the case of multidimensional distributions.  Parameter estimation is a problem more naturally discussed in statistics than in probability proper, and is covered in the companion presentation, \textit{Statistics Notes}, $\S$3.3.
+
+\section{Bayesian Perspectives}\label{sec:Bayesian_perspectives}
+There are two main interpretations of probabilistic modeling, and in particular determining the parameter, $\theta$, that governs a model for a physical process:
+
+\begin{itemize}[noitemsep]
+\item \textbf{the frequentist perspective:} the parameter, $\theta$, is best interpreted as a property of the physical process.  The parameter determines the frequency with which events occur, and the best estimate for its value is determined by measurement and a global framework for evaluating the expectation of frequencies given possible parameter values;
+\item \textbf{the Bayesian perspective:} the parameter, $\theta$, is best interpreted as a property of measurement.  The parameter is provisional and evolving, encoding a belief given prior measurement and a posterior updates given incoming information.
+\end{itemize} 
+
+Clearly, the results converge asymptotically with the incorporation of infinite information.  The transient differences -- those realized by incorporation of finite information -- are due to the choice of global framework and to the selection of prior and posterior parametric distributions.  For specific choices of each, for example a maximum-likelihood global framework and uniform prior, the differences may vanish.  In the absence of a verifiably preferred form for prior distribution the main advantages afforded the Bayesian perspective are computational convenience and efficiency.
+
+\subsection{Bayes' Theorem}\label{sec:Bayes_theorem}
+Given events, $A$ and $B$, and a probability measure, $\mathbb{P}$, \textbf{Bayes' Theorem} is
+
+\begin{equation}\label{eq:Bayes_theorem}
+\mathbb{P}\{ A | B \} = \frac{\mathbb{P}\{ B | A \} \mathbb{P} \{ A \}}{\mathbb{P}\{ B \}},
+\end{equation}
+
+which provides a means by which the event conditioning may be reversed.  The statement in (\ref{eq:Bayes_theorem}) can be interpreted either as a property of events in discrete distributions -- for which the probabilities of the events, $A$ and $B$, are determined by counting -- or as continuous random variables, for which the theorem is expressed in terms of probability densities as in (\ref{eq:Bayes_theorem_density}).
+
+\subsection{Prior, Posterior and Likelihood}\label{sec:prior_posterior_likelihood}
+Bayes' Theorem is frequently applied to the problem of parameter estimation introduced above in $\S$\ref{sec:statistical_applications_likelihood_Fisher_information}: estimate the parameter, $\theta$, that governs a random variable, $X | \theta$, from a finite set of measurements, $x_1, \cdots, x_n$, each independently sampled from the distribution, $X_i \sim X \equiv X | \theta$.  Whereas the maximum-likelihood or maximum-entropy approach is a straightforward maximization of the likelihood function, the Bayesian method raises the status of the parameter to a full-fledged random variable, and seeks solutions within the \textit{joint} distribution, $X, \theta$.  In this way we can leverage Bayes' theorem, especially expressed as factors and products of probability densities as in (\ref{eq:Bayes_theorem_density}), and develop an iterative method in terms of linked random variables, one that defines the uncertainty in the parameter, and a second that accounts for likelihood in the sampling process:
+\begin{align}
+& \mathbf{\boldsymbol{\theta}}_i &&  \text{the prior distribution for the parameter} \\
+& \mathbf{\boldsymbol{\theta}}_{i+1} | \mathbf{X}_i && \text{the posterior distribution for the parameter given measurements} \\
+& \mathbf{\mathbf{X}_i | \boldsymbol{\theta_i}} && \text{measurement distribution given prior parameter} \\
+& \mathbf{\mathbf{X}_i} && \text{unconditioned measurement distribution}
+\end{align}
+
+The alignment of the random variables with the events -- $A$ is the event that the parameter takes specific values, $B$ is the event that specific measurements are realized -- leads to the equivalent expression,
+
+\begin{equation}\label{eq:Bayes_theorem_iterative}
+p(\theta_{i+1}) \equiv p(\theta_{i+1} | \mathbf{x}_i) = \frac{p(\mathbf{x}_i | \theta_i) \,p(\theta_i)}{p(\mathbf{x}_i)} =  \frac{p(\mathbf{x}_i | \theta_i) \,p(\theta_i)}{\int_\Theta p(\mathbf{x}_i | \theta'_i) \, d\theta'_i}.
+\end{equation}
+
+Again, a fuller justification within the topic of parameter estimation -- in particular the grounding of the iterative expression in (\ref{eq:Bayes_theorem_iterative}) in terms of minimizing \textbf{Bayes' risk} -- is presented in a companion writeup, \textit{Statistics Notes}.  It is worth noting, however, that the maximum-likelihood method (usually presented as 'frequentist') is contained within the more general Bayesian approach given a uniform prior distribution for the parameter in the absence of any information afforded by measurement.  Both can be expressed in iterative form. Within the more general Bayesian approach it is also possible to specify alternative priors with greater concentration of weight in regions of the parameter space judged more likely to contain the true value, and so develop a more efficient estimator in the event that the judgment is correct.  Asymptotically, both maximum-likelihood and more general Bayesian approaches approach zero-mean Gaussian distributions whose covariance is proportional to the Fisher information contained within the measurements, $\mathbf{x}$.
+
+\subsection{Conjugate Families}\label{sec:conjugate_families}
+The form of the prior and posterior distributions in the iterative form of Bayes's theorem, expressed above in (\ref{eq:Bayes_theorem_iterative}), depend partly on the form selected for the likelihood function for measurements.  For some choices of likelihood and prior, however, the posterior distribution matches the prior distribution \textit{exactly in form}.  These pairs are termed \textbf{conjugate families}, and reduce the calculations necessary to carry out the iterative program to simple arithmetic operations.  
+
+A number of common conjugate families are provided below, but in all cases both likelihood function and parameter density distributions largely coincide in form, with a kind of dual interchange between the active `variables' and the supporting `parameters'.  In these cases the posterior distributions are generated by the product of likelihood and prior, normalized by the marginal for the prior.  The form of numerator, however, identifies the posterior as another member of the same family as the prior, and the explicit calculation of the normalizing factor is unnecessary.
+
+\subsubsection{Exponential Family Prior and Likelihoods}
+
+Prior distribution:
+\begin{equation}
+H_n \sim f_H(\eta | \tau, n) \propto \exp(\tau \eta(\theta) - n A(\eta(\theta)))
+\end{equation}
+
+Likelihood function:
+\begin{multline}
+X \sim f_X(x | \theta) = h(x) \exp(\eta(\theta) \, T(x) - A(\eta(\theta))) \Rightarrow \\
+\mathbf{X} = (X_1, \cdots, X_m)^\top \sim f_{\mathbf{X}}(\mathbf{x} | \theta) = \left( \prod_{i=1}^m h(x_i) \right) \exp \left(\eta(\theta) \, \sum_{i=1}^m T(x_i) - mA(\eta(\theta)) \right) 
+\end{multline}
+
+Posterior distribution:
+\begin{equation}
+H_{n+m} \sim f_H\left(\eta \left| \tau + \sum_{i=1}^m T(x_i) \right. , m+ n \right) \propto \exp \left( \left(\tau +  \sum_{i=1}^m T(x_i) \right) \eta(\theta) - (m+n) A(\eta(\theta)) \right)
+\end{equation}
+
+
+\subsubsection{Beta Prior, Binomial Likelihood}\label{sec:conjugate_family_beta_binomial}
+
+\begin{equation}
+\begin{rcases}
+\text{beta prior: } \hspace{35pt}   \operatorname{B}(\alpha, \beta) \propto \theta^{\alpha-1}(1-\theta)^{\beta-1} \\
+\text{binomial likelihood: } \operatorname{Bin}(n,k) \propto \theta^k (1-\theta)^{n-k}
+\end{rcases} \Rightarrow
+\text{beta posterior: } \operatorname{B}(\alpha + k, \beta + n - k)
+\end{equation}
+
+\subsubsection{Gamma Prior, Posson Likelihood}\label{sec:conjugate_family_gamma_Poisson}
+
+\begin{equation}
+\begin{rcases}
+\text{gamma prior: } \hspace{10pt}   \Gamma(\alpha, \beta) \propto x^{\alpha-1}e^{-\beta x} \\
+\text{Poisson likelihood: } \operatorname{Poi}(x) \propto x^k e^{-nx}
+\end{rcases} \Rightarrow
+\text{gamma posterior: } \Gamma(\alpha + k, \beta + n)
+\end{equation}
+
+\subsubsection{Gaussian Prior, Gaussian Likelihood}\label{sec:conjugate_family_Gaussian_Gaussian}
+\begin{multline}
+\begin{rcases}
+\text{Gaussian prior: } \hspace{50pt}   \mu \sim \operatorname{N}(\mu_0, \sigma_0) \propto \exp \left(-\frac{1}{2} \frac{(\mu - \mu_0)^2}{\sigma_0^2} \right) \\
+\text{Gaussian likelihood: } \mu | \mathbf{x} \sim \operatorname{N}(\mu, \sigma^2) \propto \prod_{i=1}^n \exp \left( -\frac{1}{2} \frac{(x_i - \mu)^2}{\sigma^2} \right)
+\end{rcases} \\ \Rightarrow
+\text{Gaussian posterior: } \mu \sim \operatorname{N}\left( \frac{\kappa_0 \mu_0 + n\bar{\mathbf{x}}}{\kappa_0 + n}, \frac{\sigma^2}{\kappa_0 + n} \right)
+\end{multline}
+
+\begin{equation}
+\kappa_0 = \frac{\sigma}{\sigma_0}
+\end{equation}
+
+\subsubsection{Inverted Gamma Prior, Gaussian Likelihood}\label{sec:conjugate_family_inverted_gamma_Poisson}
+\begin{multline}
+\begin{rcases}
+\text{inverted gamma prior: } \hspace{19pt}   \sigma^2 \sim \operatorname{I}\Gamma(\alpha, \beta) \propto \sigma^{-2(\alpha + 1)}\exp \left( -\frac{\beta}{\sigma^2} \right) \\
+\text{Gaussian likelihood: } \sigma^2 | \mathbf{x} \sim \operatorname{N}(\mu, \sigma^2) \propto \prod_{i=1}^n \frac{1}{\sigma}\exp \left( -\frac{1}{2} \frac{(x_i - \mu)^2}{\sigma^2} \right)
+\end{rcases} \\ \Rightarrow
+\text{inverted gamma posterior: } \sigma^2 \sim \operatorname{I}\Gamma \left( \alpha + \frac{n}{2}, \beta + \frac{1}{2} \sum_{i=1}^n (x_i - \mu)^2 \right)
+\end{multline}
+
+\end{document}

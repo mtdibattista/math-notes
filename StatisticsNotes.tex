@@ -1,0 +1,305 @@
+\documentclass[12pt, twoside, draft]{article}
+
+\usepackage{graphicx}
+\usepackage{amsmath, amsthm, amsfonts}
+\usepackage[numbers]{natbib}
+\usepackage{algorithm, algorithmic}
+\usepackage{placeins}
+\usepackage{rotating}
+\usepackage{booktabs}
+\usepackage{multirow} 
+\usepackage[font=small,labelfont=bf,tableposition=top]{caption}
+\usepackage{xfrac}
+\usepackage{relsize}
+\usepackage{mathrsfs}
+\usepackage{enumitem}
+\usepackage{mathtools}
+\setcounter{secnumdepth}{5}
+\usepackage{lineno}
+\usepackage{bm}
+
+\usepackage[text={16cm,23cm},centering]{geometry}
+
+\setlength{\parskip}{1.2ex}
+\setlength{\parindent}{0em}
+\clubpenalty = 100
+\widowpenalty = 100
+\renewcommand{\baselinestretch}{1.0}
+
+\newcommand*{\red}{\textcolor{red}}
+\newcommand*{\green}{\textcolor{green}}
+\newcommand*{\blue}{\textcolor{blue}}
+
+\begin{document}
+
+\setpagewiselinenumbers
+
+%\modulolinenumbers[5]
+%\linenumbers
+
+\title{Statistics (Notes)}
+
+\footnotesize\date{\today}
+
+\author{Mark DiBattista}
+%\\
+%\footnotesize \texttt{mtdibattista@gmail.com} \\ }
+
+\maketitle
+
+\begin{abstract}
+Statistics is a specific application of  probability theor...
+
+\end{abstract}
+%{\bf Keywords:} enter, keyword, here.
+
+%\tableofcontents
+
+\section{Suggested Resource Materials}
+Useful source texts:
+
+\begin{itemize}[noitemsep]
+\item Probability/Statistics, intermediate (probability sections are better than statistics):\hspace{50pt}
+\item[] \hspace{200pt} \textit{Statistical Inference}, Casella \& Berger
+\item Probability, advanced: \hspace{98pt} \textit{Probability and Measure}, Billingsley
+\end{itemize}
+
+Throughout the text the acronyms refer to companion writeups,
+\begin{align}
+&\textit{LAN} \hspace{10pt} \textit{Linear Algebra (Notes)} \notag \\
+&\textit{LAA} \hspace{10pt} \textit{Linear Algebra (Applications)} \notag \\
+&\textit{PN} \hspace{17pt} \textit{Probability Notes} \notag
+\end{align}
+within which information is referenced by chapter and/or numbered equation.
+
+\section{Statistics Preliminaries}\label{sec:statistics_preliminaries}
+
+\subsection{Nomenclature}
+Given random variables, $X$ and $Y$
+\begin{align}
+&\text{Probability} \hspace{70pt} \mathbb{P}X \hspace{40pt} \textit{PN } \S 2.1.6 \notag \\
+&\text{Expectation} \hspace{66pt} \mathbb{E}X \hspace{40pt} \textit{PN } \S 2.1.10 \notag \\
+&\text{Variance} \hspace{81pt} \mathbb{V} X \hspace{40pt} \textit{PN } \S 3.1 \notag \\
+&\text{Covariance} \hspace{71pt} \mathbb{C}(X, Y) \hspace{20pt} \textit{PN } \S 3.2 \notag\\
+&\text{Fisher Information} \hspace{38pt} \mathbb{I}_F X \hspace{35pt} \textit{PN } \S 10.4.2 \notag
+\end{align}
+
+
+\subsection{Terms and Definitions}
+\subsubsection{Basic Definitions}
+Given a random variable, usually a random vector, $\mathbf{X}$, a \textbf{statistic} is any function of the random variable, $T(\mathbf{X})$. Typically, the coordinates of the random vector, $\mathbf{X} = (X_1, \cdots, X_n)$, are sampled from a common \textit{parametrized} distribution, $X_1, \cdots, X_n \sim  X \equiv X | \theta$, for which the value of the parameter, $\theta$, is unknown.  The symbol, $\mathbf{X}_\theta$, will be used in cases for which dependence of the random sample upon the parameter is to be stressed. There are two common types of tests that are run against sample statistics:
+
+\begin{itemize}
+\item \textbf{Point Estimation: } Given a random sample, $\mathbf{X} = \mathbf{x}$, and an explicit metric, provide the best estimate for the parameter, $\theta$, that governs the distribution; 
+\item \textbf{Interval Testing:} Given a hypothetical value for the parameter, $\theta$, or a hypothesis that the random coordinates are independent, estimate the probability that the random sample, $\mathbf{X} = \mathbf{x}$, falls within a specified range.  Hypotheses may be rejected if the realized measurement is deemed sufficiently improbable.
+\end{itemize}
+
+The \textbf{bias} of a point estimator is given by the mean of the difference between true value and test statistic:
+\begin{equation}
+\mathbb{B} T(\mathbf{X}) = \mathbb{E} \left( T(\mathbf{X}) - \theta \right).
+\end{equation}
+The \textbf{mean-squared error} of a point estimator is given by the variance of the difference between true value and test statistic:
+\begin{equation}
+\mathbb{M} T(\mathbf{X}) = \mathbb{E} \left( T(\mathbf{X}) - \theta \right)^2 = \mathbb{V}T(\mathbf{X}) + (\mathbb{B} T(\mathbf{X}))^2.
+\end{equation}
+
+There are two standard kinds of optimality for point estimators for a given parameter, expressed in terms of bias and mean-squared error:
+\begin{itemize}
+\item The \textbf{Minimum-Variance Unbiased Estimator (MVUE)} has the least mean-squared error among all estimators with no bias;
+\item The \textbf{Minimum Mean-Squared Error (MMSE)} has the least mean-squared error among \textit{all} estimators.
+\end{itemize}
+Frequently, for point estimators small increases in bias can be traded for significant reduction in mean-squared error.
+
+\subsubsection{Properties of Point Estimators}\label{sec:properties_point_estimators}
+Statistics are described by a number of properties:
+\begin{itemize}
+\item An \textbf{unbiased statistic} is one for which the bias is zero,
+\begin{equation}
+\mathbb{B} T(\mathbf{X}) = 0
+\end{equation}
+\item A \textbf{sufficient statistic}  is one that contains \textit{all} information necessary to estimate the parameter, $\theta$. A sufficient condition for the sufficition statistic is given by the \textbf{Fisher-Neyman Theorem}:
+\begin{equation}
+p_{\mathbf{X} | \theta} (\mathbf{X} | \theta) = h(\mathbf{X}) g(\theta, T(\mathbf{X})) \Rightarrow T(\mathbf{X}) \text{ is a sufficient statistic}
+\end{equation}
+\item A \textbf{complete statistic} is one that ensure the 
+\end{itemize}
+
+\subsubsection{Asymptotic Properties of Statistics}\label{sec:asymptotic_properties_statistics}
+Given an increasing vector of random variables, $\mathbf{X}_n = (X_1, \cdots, X_n), X_i \sim X$, sampled from a parametrized distribution, $X \equiv X | \theta$, and a sequence of statistics, $T(\mathbf{X}_n)$, we have the following statistical analogs to the law of large numbers and central limit theorem:
+
+\begin{itemize}
+\item A \textbf{consistent statistic} converges in probability to the true parameter value,
+\begin{equation}
+T(\mathbf{X}_n) \stackrel{p}{\longrightarrow} \theta
+\end{equation}
+\item An \textbf{asymptotically normal statistic} converges in distribution to a Gaussian with variance decreasing in proportion to the square-root of the number of samples,
+\begin{equation}
+\sqrt{n} (T(\mathbf{X}_n) - \theta) \stackrel{d}{\longrightarrow} \operatorname{N}(0,\sigma^2)
+\end{equation}
+\end{itemize}
+
+\section{Point Estimation}\label{sec:point_estimation}
+A \textbf{point estimator} is a sample statistic of parametrized distribution whose value provides an estimate for the parameter,
+\begin{equation}
+\mathbf{X} = (X_1, \cdots, X_n), X_i \sim X \equiv X | \theta \Rightarrow T(\mathbf{X}) \approx \theta.
+\end{equation}
+A point estimator is therefore a random variable, governed by a probability distribution, and with full rights all other properties afforded by probability theory.
+
+The \textbf{efficiency} of a point estimator is a measure of its variance in comparison to all other point estimators of the same parameter.  The most efficient point estimator has least variance.
+
+\subsection{Cramer-Rao Lower Bound}\label{Cramer-Rao_lower_bound}
+The theoretical minimum variance for unbaised point estimators is provided by the \textbf{Cramer-Rao lower bound}: given a point estimator for the parameter, 
+\begin{equation}\label{eq:Cramer-Rao_unbiased}
+\begin{rcases}
+\mathbf{X}_\theta = (X_1, \cdots, X_n), X_i \sim X \equiv X | \theta \\
+\mathbb{B} T(\mathbf{X}_\theta) = 0
+\end{rcases} \Rightarrow
+\mathbb{V} T(\mathbf{X}_\theta) \geq \frac{1}{\mathbb{I}_F \mathbf{X}_\theta},
+\end{equation}
+the theoretical minimum possible variance across all possible statistics is provided by the reciprocal of the Fisher information (\textit{cf. PN}, $\S$10.4.2).  The Cramer-Rao lower bound provides the variance for the MVUE.
+
+For arbitrary statistics, not necessarily unbiased, the Cramer-Rao lower bound is proportional to a function of the expectation of the statistic:
+\begin{equation}\label{eq:Cramer-Rao_arbitrary}
+\mathbb{V} T(\mathbf{X}_\theta) \geq \frac{\left( \frac{\partial}{\partial \theta} \mathbb{E} T(\mathbf{X}_\theta) \right)^2}{\mathbb{I}_F \mathbf{X}_\theta}.
+\end{equation}
+
+A derivation of the Cramer-Rao theorem follows directly from an application of the Cauchy-Schwarz inequality (\textit{cf. PN}, $\S$4.1) to the covariance of the score function (again \textit{cf. PN}, $\S$10.4.2), $S(\theta | \mathbf{X})$, and the statistic, $T(\mathbf{X})$.  Given the covariance,
+\begin{align}
+\mathbb{C}(S(\theta | \mathbf{X}_\theta), T(\mathbf{X}_\theta)) &= \mathbb{E} S(\theta | \mathbf{X}_\theta) T(\mathbf{X}_\theta) - \mathbb{E}S(\theta | \mathbf{X}_\theta) \cdot \mathbb{E} T(\mathbf{X}_\theta) =  \mathbb{E} S(\theta | \mathbf{X}_\theta) T(\mathbf{X}_\theta) \notag \\
+&= \int_D p(\mathbf{x} | \theta) T(\mathbf{x}) \frac{\partial}{\partial \theta} \ln p (\mathbf{x} | \theta) \, d\mathbf{x} = \int_D T(\mathbf{x}) \frac{\partial}{\partial \theta} p(\mathbf{x} | \theta) \, d\mathbf{x} = \frac{\partial}{\partial \theta} \mathbb{E} T(\mathbf{X}_\theta),
+\end{align}
+the Cauchy-Schwarz inequality yields
+\begin{equation}
+\mathbb{V}(S(\theta | \mathbf{X}_\theta) \cdot \mathbb{V} T(\mathbf{X}_\theta) \geq\left(\mathbb{C}(S(\theta | \mathbf{X}_\theta), T(\mathbf{X}_\theta)) \right)^2 \Rightarrow \mathbb{V} T(\mathbf{X}_\theta) \geq \frac{\left( \mathbb{C}(S(\theta | \mathbf{X}_\theta), T(\mathbf{X}_\theta)) \right)^2}{\mathbb{V}(S(\theta | \mathbf{X}_\theta)} = \frac{\left( \frac{\partial}{\partial \theta} \mathbb{E} T(\mathbf{X}_\theta) \right)^2}{\mathbb{I}_F \mathbf{X}_\theta}.
+\end{equation}
+
+\subsection{Rao-Blackwell Theorem}\label{sec:Rao-Blackwell_theorem}
+
+\subsection{Methods for Generating Point Estimators}\label{sec:point_estimators}
+\textbf{Point estimation} is the 
+\subsubsection{Point Estimators for Moments}\label{sec:point_estimators_moments}
+
+\begin{equation}
+\mathbf{X} = (X_1, \cdots, X_n), X_i \sim X \Rightarrow
+\begin{cases}
+\hspace{35pt} \vdots \\
+S^j_n = \frac{1}{n} \sum_{i=1}^n X^j_i \\
+\hspace{35pt} \vdots
+\end{cases}
+\end{equation}
+
+\begin{align}
+&\hspace{30pt} \vdots \notag\\
+&\mu_i \hspace{1pt} = \mathbb{E}X^i \hspace{5pt} = \mathbb{E}S^i_n \\
+&\hspace{30pt} \vdots \notag
+\end{align}
+
+\begin{multline}
+\mathbb{C}(S^i_n, S^j_n) = \mathbb{E}(S^i_n - \mathbb{E}S^i_n)(S^j_n - \mathbb{E}S^j_n) = \mathbb{E}S^i_n S^j_n - \mathbb{E}S^i_n \mathbb{E}S^j_n = \mathbb{E}S^{i+j}_n  - \mathbb{E}S^i_n \mathbb{E}S^j_n \\
+ = \mu_{i+j} - \mu_i \mu_j
+\end{multline}
+
+\subsubsection{Method of Moments}\label{sec:method_of_moments}
+
+
+\begin{align}
+&\mu_1 \hspace{1pt} = \mathbb{E}X \hspace{5pt} = g_1(\theta_1, \cdots, \theta_k) \notag \\
+&\hspace{30pt} \vdots \notag \\
+&\mu_k = \mathbb{E}X^k = g_k(\theta_1, \cdots, \theta_k)
+\end{align}
+
+\begin{equation}
+s^j_n = \frac{1}{n}\sum_i x^j_i \Rightarrow
+\begin{cases}
+\mathbb{E}X \hspace{4pt} \approx s^1_n \hspace{1pt}  = g_1(\hat{\theta}_1, \cdots, \hat{\theta}_k) \notag \\
+\hspace{26pt} \vdots \notag \\
+\mathbb{E}X^k \approx s^k_n = g_k(\hat{\theta}_1, \cdots, \hat{\theta}_k)
+\end{cases}
+\end{equation}
+
+\begin{equation}
+\mathbf{s}_n = \mathbf{g}(\hat{\boldsymbol{\theta}}) \Rightarrow \hat{\boldsymbol{\theta}} = \mathbf{g}^{-1}(\mathbf{s}_n)
+\end{equation}
+
+If $\mathbf{g}^{-1}$ is differentiable at the point, $\boldsymbol{\mu} = (\mu_1, \cdots, \mu_k)$, and $\mathbb{E} |X|^{2k} < \infty$, then $\hat{\boldsymbol{\theta}}$ is an \textit{asymptotically normal estimator} for $\boldsymbol{\theta}$, since by the delta method (cf. \textit{PN} $\S$9.2.2.2),
+
+\begin{equation}
+\sqrt{n}(\hat{\boldsymbol{\theta}} - \boldsymbol{\theta}) \stackrel{d}{\longrightarrow} \operatorname{N}(\mathbf{0}, (\nabla \mathbf{g}^{-1}(\boldsymbol{\mu}))^\top \boldsymbol{\Sigma}(\nabla \mathbf{g}^{-1}(\boldsymbol{\mu})), \;\;\Sigma_{ij} = \mu_{i+j} - \mu_i \mu_j
+\end{equation}
+
+
+\subsubsection{Maximum-Likelihood Estimators}\label{sec:maximum-likelihood_estimators}
+Given a set of 
+\begin{equation}
+\hat{\theta} \leftarrow \max_{\theta \in \Theta} \ln L_n(\theta | \mathbf{x}) = \max_{\theta \in \Theta} \frac{1}{n} \sum_{i=1}^n \ln p(x_i | \theta)
+\end{equation}
+
+
+The maximum-likelihood estimator is
+\begin{itemize}
+\item a \textit{consistent estimator} for $\theta$;
+\item an \textit{asymptotically normal estimator} that satisfies the Cramer-Rao lower bound.
+\end{itemize}
+
+Together these statements imply that
+\begin{equation}
+\sqrt{n}(\hat{\theta} - \theta) \stackrel{d}{\longrightarrow} \operatorname{N}\left(0, \frac{1}{\mathbb{I}_F \mathbf{X}_\theta}\right)
+\end{equation}
+
+
+The proof follows from the asymptotic properties of the score function (\textit{cf. PN}, $\S$10.4.2):
+\begin{equation}
+S(\hat{\theta} | \mathbf{X}) \approx S(\theta | \mathbf{X}) +  (\hat{\theta} - \theta) \frac{\partial}{\partial \theta}S(\theta | \mathbf{X})\Rightarrow
+\sqrt{n} (\hat{\theta} - \theta) \approx \frac{\frac{1}{\sqrt{n}}S(\theta | \mathbf{X})}{-\frac{1}{n}\frac{\partial}{\partial \theta}S(\theta | \mathbf{X})}
+\end{equation}
+
+Using the property that the expectation of the score function vanishes, we apply the central limit theorem (\textit{cf. PN}, $\S$9.2.2) to the numerator,
+\begin{equation}
+\frac{1}{\sqrt{n}}S(\theta | \mathbf{X}) = \sqrt{n}\left(\frac{1}{n}S(\theta | \mathbf{X}) - \mathbb{E}S(\theta | \mathbf{X})\right)\stackrel{d}{\longrightarrow} \operatorname{N}(\mathbb{E}S(\theta | \mathbf{X}), \mathbb{V}S(\theta | \mathbf{X})) = \operatorname{N}\left(0, \mathbb{I}_F \mathbf{X}_\theta\right),
+\end{equation}
+we apply the law of large numbers (\textit{cf. PN}, $\S$9.2.1) to the denominator,
+\begin{equation}
+-\frac{1}{n} \frac{\partial}{\partial \theta}S(\theta | \mathbf{X}) \stackrel{p}{\longrightarrow} -\mathbb{E} \frac{\partial}{\partial \theta} S(\theta | \mathbf{X}) =  \mathbb{I}_F \mathbf{X}_\theta
+\end{equation}
+and conclude via Slutsky's theorem (\textit{cf. PN}, $\S$9.1.5) that
+\begin{equation}
+\sqrt{n}(\hat{\theta} - \theta) \stackrel{d}{\longrightarrow} \frac{1}{\mathbb{I}_F \mathbf{X}_\theta} \operatorname{N}(0, \mathbb{I}_F \mathbf{X}_\theta) = \operatorname{N}\left( 0, \frac{1}{\mathbb{I}_F \mathbf{X}_\theta} \right).
+\end{equation}
+
+\paragraph{Multidimensional Maximum-Likelihood Estimators}\label{sec:multidimensional_maximum-likelihood_estimators} $\\ \\$
+
+\begin{equation}
+\sqrt{n}(\hat{\boldsymbol{\theta}} - \boldsymbol{\theta}) \stackrel{d}{\longrightarrow} \operatorname{N}(\mathbf{0}, (\mathbb{I}_F \mathbf{X}_{\boldsymbol{\theta}})^{-1})
+\end{equation}
+
+\subsubsection{Bayesian Estimators}\label{Bayesian_estimators}
+
+Bayes Risk
+
+\begin{equation}
+\mathbb{E}_\pi \Lambda(\theta, \hat{\theta})
+\end{equation}
+
+\begin{equation}
+\hat{\theta}^* \leftarrow \max_{\hat{\theta}^* \in \Theta} \mathbb{E}_\pi \Lambda(\theta, \hat{\theta})
+\end{equation}
+
+
+\begin{equation}
+\Lambda(\theta, \hat{\theta}) = (\theta - \hat{\theta})^2 \Rightarrow
+0 = \left. \frac{\partial}{\partial \hat{\theta}} \mathbb{E}_\pi  (\theta - \hat{\theta})^2 \right|_{\hat{\theta} = \hat{\theta}^*}
+= -2 \mathbb{E}_\pi (\theta - \hat{\theta}^*)
+\Rightarrow \hat{\theta}^* = \mathbb{E}_\pi \theta
+\end{equation}
+
+Iterative method
+ 
+\begin{equation}
+\pi(\theta) \equiv \pi(\theta | \mathbf{x}) = \frac{p(\mathbf{x} | \theta) \pi(\theta)}{p(\mathbf{x})}
+\end{equation}
+
+\begin{equation}
+\cdots \mathbf{x}_i, \theta_i \Rightarrow \hat{\theta}_{i+1} : \mathbf{x}_{i + 1}, \theta_{i+1} \Rightarrow \hat{\theta}_{i+2}, \cdots
+\end{equation}
+
+\end{document}

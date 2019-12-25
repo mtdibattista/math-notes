@@ -1,0 +1,1452 @@
+\documentclass[12pt, twoside, draft]{article}
+
+\usepackage{graphicx}
+\usepackage{amsmath, amsthm, amsfonts}
+\usepackage[numbers]{natbib}
+\usepackage{algorithm, algorithmic}
+\usepackage{placeins}
+\usepackage{rotating}
+\usepackage{booktabs}
+\usepackage{multirow} 
+\usepackage[font=small,labelfont=bf,tableposition=top]{caption}
+\usepackage{xfrac}
+\usepackage{relsize}
+\usepackage{mathrsfs}
+\usepackage{enumitem}
+\usepackage{mathtools}
+\setcounter{secnumdepth}{5}
+\usepackage{lineno}
+\usepackage{bm}
+
+\usepackage[text={16cm,23cm},centering]{geometry}
+
+\setlength{\parskip}{1.2ex}
+\setlength{\parindent}{0em}
+\clubpenalty = 100
+\widowpenalty = 100
+\renewcommand{\baselinestretch}{1.0}
+
+\newcommand*{\red}{\textcolor{red}}
+\newcommand*{\green}{\textcolor{green}}
+\newcommand*{\blue}{\textcolor{blue}}
+
+\begin{document}
+
+\setpagewiselinenumbers
+
+%\modulolinenumbers[5]
+%\linenumbers
+
+\title{Linear Algebra (Notes)}
+
+\footnotesize\date{\today}
+
+\author{Mark DiBattista}
+%\\
+%\footnotesize \texttt{mtdibattista@gmail.com} \\ }
+
+\maketitle
+
+\begin{abstract}
+(Real) Linear Algebra is the study of vectors and linear vector operators whose elements are real numbers and whose rules of combination are governed by vector addition and scalar multiplication.  Vectors are organized into collections, called  vector spaces, and operators can be defined by induced partitions as one vector space  is mapped to another.  In fact the full set of $n$-dimensional vectors -- represented as lists of $n$ real numbers -- is partitioned by linear operators into no more than $n$ vector subspaces, and the behavior of operators within these subspaces is classified into just a handful of distinct categories. 
+
+\end{abstract}
+%{\bf Keywords:} enter, keyword, here.
+
+%\tableofcontents
+
+\section{Suggested Resource Materials}
+Useful source texts:
+
+\begin{itemize}[noitemsep]
+\item Basic linear algebra:\hspace{50pt} \textit{Applied Linear Algebra}, Noble \& Daniel
+\item[] \hspace{140pt} \textit{Introduction to Linear Algebra}, Strang
+\item Computational perspective: \hspace{13pt} \textit{Matrix Computations}, Golub \& Van Loan
+\item Optimization applications: \hspace{18pt} \textit{Practical Optimization}, Gill, Murray \& Wright
+\item Many, many matrix formulas: (http://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf)
+\end{itemize}
+
+\section{Fundamentals of Vectors and Vector Spaces}
+\subsection{Vectors, Covectors}\label{sec:vectors-covectors}
+
+A \textbf{vector} is an ordered list of real numbers that supports two linear arithmetic operations:
+\begin{itemize}[noitemsep]
+\item scalar multiplication, in which a vector is combined with a scalar value to produce another vector;
+\item vector addition, in which two vectors are combined to produce a third.
+\end{itemize}
+
+For vectors represented as tuples -- an ordered list with a \textit{finite} number of elements -- these arithmetic requirements are applied element by element, and vector addition inherits the commutative and associative properties of the element operations.  Vectors are distinguished by the number of elements, and the rules of combination require that the numbers match, so that ordered lists with differing numbers of elements cannot be combined.  It is useful to distinguish two orientations of ordered tuples: \textbf{column vectors}, for which the constituent numbers are organized vertically, and \textbf{row vectors}, for which the constituents are organized horizontally.  The elements of the vector are called \textbf{coordinates}, and are referenced by ordinal position.
+
+By convention column vectors are represented in boldface, $\mathbf{c}$, and an enumerated list of column vectors, $\mathbf{c}_1, \ldots, \mathbf{c}_n$, are referenced by paired subscripts that index the coordinate first and the column vector second.  Given these reference conventions, the vector arithmetic operations for the first two column vectors, each with $m$ elements, are defined as
+
+\begin{equation}\label{eq:vector_arithmetic_column}
+\begin{rcases}
+\mathbf{c}_1 = \begin{pmatrix} c_{11} \\ \vdots \\ c_{m1} \end{pmatrix} \\
+\mathbf{c}_2 = \begin{pmatrix} c_{12} \\ \vdots \\ c_{m2} \end{pmatrix}
+\end{rcases}
+\Rightarrow 
+\begin{array}{l}
+\alpha \mathbf{c}_1 = \begin{pmatrix} \alpha c_{11} \\ \vdots \\ \alpha c_{m1} \end{pmatrix} \\
+\mathbf{c}_1 + \mathbf{c}_2 = \begin{pmatrix} c_{11} + c_{12} \\ \vdots \\ c_{m1} + c_{m2} \end{pmatrix}
+\end{array}.
+\end{equation}
+
+By convention row vectors are represented in boldface with a superscript operator, $^\top$, as in $\mathbf{r}^\top$, and an enumerated list of row vectors, $\mathbf{r}_1^\top, \ldots, \mathbf{r}_n^\top$, are referenced by paired subscripts that index the row vector first and the coordinate second.  Given these reference conventions, the vector arithmetic operations for the first two row vectors, each again with $m$ elements, are defined as
+
+\begin{align}\label{eq:vector_arithmetic_row}
+\left. \begin{array}{r}
+\mathbf{r}_1^\top = \begin{pmatrix} r_{11} & \ldots & r_{1m} \end{pmatrix} \\
+\mathbf{r}_2^\top = \begin{pmatrix} r_{21} & \ldots & r_{2m} \end{pmatrix}
+\end{array}
+\right\} \Rightarrow 
+\begin{array}{l}
+\alpha \mathbf{r}_1^\top = \begin{pmatrix} \alpha r_{11} & \ldots & \alpha r_{1m} \end{pmatrix} \\
+\mathbf{r}_1^\top + \mathbf{r}_2^\top = \begin{pmatrix} r_{11} + r_{21} & \ldots & r_{1m} + r_{2m} \end{pmatrix}
+\end{array} .
+\end{align}
+
+Both column vectors and row vectors possess additive identities and inverses.  The additive identity elements, or zero vectors, are represented in boldface, $\mathbf{0}$ and $\mathbf{0}^\top$, for column and row vectors, respectively.  The additive inverse for any given column or row vector is constructed by scalar multiplication of the vector by the real multiplicative inverse, -1.
+
+Although both column and row representations satisfy the algebraic requirements for vectors, it is customary to reserve the term \textbf{vector} specifically for column vectors and refer to the row representation as a \textbf{covector}.  This partly explains the nomenclature for covectors: the form, $\mathbf{r}^\top$, implies that the vector, $\mathbf{r}$, is converted to a covector by the superscript operator, $^\top$.  A more complete description of the differences in interpretation between vectors and covectors is delayed to the presentation of the geometric view in $\S$\ref{sec:geometric-interpretation}.
+
+\subsection{Linear Independence}\label{sec:linear-independence}
+
+The arithmetic rules of combination for vectors -- scalar multiplication and vector addition -- define the complete set of low-level operations available to vectors.  Composite operations are simply sequential applications of these basic operations.  In particular combining vectors using both scalar multiplication and vector addition yields an operation known as a \textbf{linear combination}.  Given a set of vectors, $\{\mathbf{v}_1, \ldots, \mathbf{v}_n\}$, and a set of real values, $\{\alpha_1, \ldots, \alpha_n\}$, the linear combination is expressed as
+
+\begin{equation}\label{eq:linear_combination}
+\alpha_1 \mathbf{v}_1 + \cdots + \alpha_n \mathbf{v}_n \equiv \sum_{i=1}^n \alpha_i \mathbf{v}_i .
+\end{equation}
+
+A set of vectors is termed \textbf{linearly independent} if a vanishing linear combination requires all multiplying constants to be zero:
+
+\begin{equation}\label{eq:linear_independence}
+\sum_{i=1}^n \alpha_i \mathbf{v}_i = 0 \Rightarrow \alpha_1 = \cdots = \alpha_n .
+\end{equation}
+
+If this is not the case, and there exist constants, $\alpha_1, \ldots, \alpha_n$, some nonzero, for which the linear combination vanishes, then the set of vectors is \textbf{linearly dependent}.  Indeed, it is possible to express any vector with a nonzero multiplier as a linear combination of the others:  let the first vector be one for which the multiplier is nonzero, $\alpha_1 \neq 0$, then we can rearrange terms so that
+
+\begin{equation}\label{eq:linear_dependence}
+\mathbf{v}_1 = \sum_{i=2}^n \frac{\alpha_i}{\alpha_1} \mathbf{v}_i .
+\end{equation}
+
+\subsection{Vector Spaces}\label{sec:vector-spaces}
+
+A \textbf{vector space}, $\mathbb{V}$, is a set of vectors that is closed under arbitrary linear combination of its elements:
+
+\begin{equation}\label{eq:vector_space}
+\begin{rcases}
+\mathbf{v}_1, \mathbf{v}_2 \in \mathbb{V} \\
+\alpha_1, \alpha_2 \in \mathbb{R}
+\end{rcases}
+\Rightarrow
+\left( \alpha_1 \mathbf{v}_1 + \alpha_2 \mathbf{v}_2 \right) \in \mathbb{V} .
+\end{equation}
+
+Since the linear combination in (\ref{eq:vector_space}) is arbitrary, a vector space contains \textit{all} linear combinations of \textit{any} two vectors contained within the set.  And since linear combination is associative, a vector space also contains \textit{all} linear combinations of \textit{any} selection of its elements.  
+
+\begin{itemize}[noitemsep]
+\item A \textbf{basis} for a vector space is a linearly independent set of vectors that can generate \textit{all} vectors in the space through linear combination.
+\item The basis is said to \textbf{span} the vector space generated by its members.  The $\operatorname{span}$ operator yields the vector space generated by a basis set.
+\item The \textbf{dimension} of a vector space is the number its basis vectors.  The $\dim$ operator yields the count of basis vectors for a vector space.
+\end{itemize}
+
+Given a set of vectors, $\{\mathbf{v}_1, \ldots, \mathbf{v}_n\}$, that forms a basis of an $n$-dimensional vector space, $\mathbb{V}$, we have
+
+
+\begin{align}\label{eq:span_dim}
+\operatorname{span} (\{\mathbf{v}_1, \ldots, \mathbf{v}_n\}) &= \mathbb{V}; \\
+\dim (\mathbb{V}) &= n.
+\end{align}
+
+Vector spaces do not have unique bases, since any linearly independent sets can freely generate any other linearly independent set with the same number of vectors.  Bases are not unique, but all bases for a given vector space share the same dimension.  There is, however, a kind of preferred basis: the \textbf{natural basis} for an $n$-dimensional space is the set of vectors, $\{\mathbf{e}_1, \ldots, \mathbf{e}_n\}$, for which a single element is 1 and the remainder 0:
+
+\begin{equation}\label{eq:natural_basis_vectors}
+\mathbf{e}_i = \begin{pmatrix} 0 \\ \vdots \\ 0 \\ 1 \\ 0 \\ \vdots \\ 0 \end{pmatrix} \leftarrow i^{th} \text{ position.}  
+\end{equation}
+
+An arbitrary vector, $\mathbf{v}$, is expressed as a linear combination of the natural basis vectors weighted by the coordinate values, $v_1, \ldots, v_n$ :
+
+\begin{equation}\label{eq:natural_basis_expansions}
+\mathbf{v} = \begin{pmatrix} v_1 \\ \vdots \\ v_n \end{pmatrix} \equiv \sum_{i=1}^n v_i \mathbf{e}_i .
+\end{equation}
+
+Since row vectors also satisfy the algebraic requirements of vectors it is possible to define a basis for row vectors in a manner analogous to column vectors.  In particular the natural basis for the $n$-dimensionaly vector space of covectors is usually represented as the set, $\{\mathbf{f}_1^\top, \ldots, \mathbf{f}_n^\top \}$,
+
+\begin{equation}\label{eq:natural_basis_covectors}
+\mathbf{f}_j^\top = \begin{pmatrix} 0 & \cdots & 0 & 1 & 0 & \cdots & 0 \end{pmatrix} ,
+\end{equation}
+
+for which the entry in the $j^{th}$ position is 1 and the remainder 0.
+
+\subsubsection{Vector Subspaces}\label{sec:vector_subspaces}
+
+A \textbf{subspace}, $\mathbb{S}$, of a vector space, $\mathbb{V}$, is a set of vectors such that
+\begin{itemize}[noitemsep]
+\item $\mathbb{S}$ is itself a vector space:
+\end{itemize}
+\begin{equation}\label{eq:vector_subspace}
+\begin{rcases}
+\mathbf{s}_1, \mathbf{s}_2 \in \mathbb{S} \\
+\alpha_1, \alpha_2 \in \mathbb{R}
+\end{rcases}
+\Rightarrow
+\alpha_1 \mathbf{s}_1 + \alpha_2 \mathbf{s}_2 \in \mathbb{S} ;
+\end{equation}
+\begin{itemize}[noitemsep]
+\item $\mathbb{S}$ is a proper subset of $\mathbb{V}$ with strictly lower dimension:
+\end{itemize}
+\begin{equation}\label{eq:vector_subspace_dimension}
+\mathbb{S} \subset \mathbb{V} \Rightarrow \dim(\mathbb{S}) < \dim(\mathbb{V}).  
+\end{equation}
+
+Roughly speaking, a subspace is a vector space imbedded in a larger vector space.  A subspace must contain the origin of the larger space, and is infinite in extent in all directions spanned by the basis.
+
+\begin{itemize}[noitemsep]
+\item A linear translation of a subspace in any direction is known as an \textbf{affine space}.  This cannot be a subspace, since it does not include the origin;  
+\item A collection of vectors that includes only positive entries in one coordinate is not a vector space or subspace, since multiplication of any element vector by -1 yields a vector outside the set.
+\end{itemize}
+
+\subsubsection{Direct Sum of Vector Spaces}
+Two distinct vector subspaces, $\mathbb{S}_1$ and $\mathbb{S}_2$, such that $\mathbb{S}_1 \cap \mathbb{S}_2 = \left\{\mathbf{0}\right\}$, may be joined by the operator, $\oplus$, to form a larger vector space.  The operation
+
+\begin{equation}\label{eq:def_oplus}
+\mathbb{S}_1 \oplus \mathbb{S}_2 = \mathbb{V},
+\end{equation}
+
+asserts that every vector in the space, $\mathbb{V}$, can be expressed as a linear combination of vectors in subspaces,
+$\mathbb{S}_1$ and $\mathbb{S}_2$.
+
+It is frequently true that a mathematical property may hold not just for single vectors, but for collections of vectors, and if it holds for any two vectors, then it holds for all linear combinations of the two vectors as well.  This implies that mathematical properties hold, or do not hold, for vector subspaces, or vary over subspaces of a larger vector space.  The `structure' of a mathematical property of a vector space is best understood through values defined over the vector subspaces that, through the operator, $\oplus$, comprise it.
+
+\subsection{Matrices}\label{matrices}
+
+The form of a matrix, $A$, is a generalization of row and column vectors, organized as rectangular arrangements of real numbers, or as lists of column or row vectors:
+\begin{itemize}[noitemsep]
+\item an $m \times n$ rectangular arrangement of real numbers, 
+\end{itemize}
+\begin{equation}
+A = \begin{pmatrix} a_{11} & \cdots & a_{1n} \\ \vdots & \ddots & \vdots \\ a_{m1} & \cdots & a_{mn} \end{pmatrix} \text{\hspace{135pt}}
+\end{equation}
+\begin{itemize}
+\item a row of $n$ column vectors, 
+\end{itemize}
+\begin{equation}
+A = \begin{pmatrix} \uparrow & & \uparrow \\ \mathbf{c}_1 & \ldots & \mathbf{c}_n \\ \downarrow & & \downarrow \end{pmatrix}
+\text{, such that } \mathbf{c}_i = \begin{pmatrix} a_{i1} \\ \vdots \\ a_{im}\end{pmatrix} \text{; \hspace{40pt}}
+\end{equation}
+\begin{itemize}
+\item a column of $m$ row vectors, 
+\end{itemize}
+\begin{equation}
+A = \begin{pmatrix} \leftarrow & \mathbf{r}_1^\top & \rightarrow \\ & \vdots & \\ \leftarrow & \mathbf{r}_m^\top & \rightarrow \end{pmatrix} \text{, such that } \mathbf{r}_j^\top = \begin{pmatrix} a_{1j} & \cdots & a_{nj} \end{pmatrix}.
+\end{equation}
+
+The naming convention of using $\mathbf{c}_i$ to refer to the $i^{th}$ column and using $\mathbf{r}_j^\top$ to refer to the $j^{th}$ row of a matrix is used throughout the text.
+
+It is frequently useful to think of $m$-dimensional column vectors as $m \times 1$ matrices and $n$-dimensional row vectors (or covectors) as $1 \times n$ matrices.  A description of the major application of matrices as linear operators on vectors is delayed to $\S$\ref{sec:matrix-vector-multiplication}.
+
+\section{Vector and Matrix Operators}\label{sec:vector-matrix-operators}
+
+\subsection{Transpose}\label{sec:transpose}
+If an $m \times n$ matrix, $A$, has elements $a_{ij}$, the \textbf{transpose matrix}, $A^\top$, is an $n \times m$ matrix with elements $a_{ji}$.  
+\begin{itemize}[noitemsep]
+\item The transpose of a column vector, $\mathbf{c}$, is a row vector, $\mathbf{c}^\top$;
+\item The transpose of a row vector, $\mathbf{r}^\top$, is a column vector, $\mathbf{r}^{\top \top} \equiv \mathbf{r}$;
+\item The transpose of a matrix product is the product of transpose matrices in reverse order, $(AB)^\top = B^\top A^\top$.
+\end{itemize}
+
+We shall borrow the transpose operator to be more spatially economic in the representation of column vectors, so that $\mathbf{c} = \begin{pmatrix} c_1 & \ldots & c_n \end{pmatrix}^\top$ .
+
+We shall also distinguish symbolically between basis vectors and covectors, so that the transpose of $\mathbf{e}_i$ is written as $\mathbf{f}_i^\top$, and \textit{v.v}.
+
+\subsection{Inner Product}\label{sec:inner-product}
+Given two $n \times 1$ column vectors, $\mathbf{u}$ and $\mathbf{v}$, the \textbf{inner product} is a scalar function:
+
+\begin{equation}\label{eq:inner_product}
+\mathbf{u} \cdot \mathbf{v} \equiv \mathbf{u}^\top \mathbf{v} \equiv \langle \mathbf{u}, \mathbf{v} \rangle \equiv \sum_{i=1}^{n} u_i v_i .
+\end{equation}
+
+The inner product is a bilinear symmetric operator, 
+\begin{itemize}[noitemsep]
+\item symmetric: $\langle \mathbf{u}, \mathbf{v} \rangle \equiv \langle \mathbf{v}, \mathbf{u} \rangle$
+\item bilinear: $\langle \mathbf{u}, \mathbf{v}_1 + \mathbf{v}_2 \rangle \equiv \langle \mathbf{u}, \mathbf{v}_1 \rangle + \langle \mathbf{u}, \mathbf{v}_2 \rangle$, and $\langle \mathbf{u}_1 + \mathbf{u}_2, \mathbf{v} \rangle \equiv \langle \mathbf{u}_1, \mathbf{v} \rangle + \langle \mathbf{u}_2, \mathbf{v} \rangle$,
+\end{itemize}
+
+The various forms of the inner product imply different operations to the underlying vectors.  In the `dot product' formulation, $\mathbf{u} \cdot \mathbf{v}$, the inner product is an operation on two vectors.  In the `covector-vector' formulation, $\mathbf{u}^\top \mathbf{v}$, the first vector is converted to a covector via the transpose operator, then multiplied against the vector.  The `bra-ket' formulation, $\langle \mathbf{u}, \mathbf{v} \rangle$, is symbology used in modern physics for which covectors are preceded by left angle brackets and vectors are succeded by right angle brackets:
+
+\begin{align}
+\text{bra: \hspace{5pt}} & \langle \mathbf{u}  \equiv  \mathbf{u}^\top \\
+\text{ket: \hspace{5pt}} & \mathbf{v} \rangle  \equiv  \mathbf{v} 
+\end{align}
+
+These formulations are interchangeable, but one choice or another frequently makes the underlying point more clear.  In particular the bra-ket formulation can make clear more-complicated matrix-vector operations, especially under change of bases (see below in $\S$\ref{sec:change_of_basis}).
+
+\subsubsection{Geometric Interpretation of $n$-dimensional Real Inner Product Space}\label{sec:geometric-interpretation}
+The algebraic view of vectors, in (\ref{eq:vector_arithmetic_column}), provides the rules of combination that vectors must follow.  The geometric view provides an alternative interpretation of vectors as spatial arrangements of points in rectilinear organization.  Vectors are directed line segments adjoining the origin to a specific point in space; one-dimensional vector spaces are the locus of points that comprise straight lines that travel through the origin; two-dimensional vector spaces are the locus of points that comprise planes that include the origin, and so on.  In the geometric view a vector space that is spanned by the natural basis of $n$ vectors and endowed with an inner product is equivalent to the $n$-dimensional space of real numbers:
+
+\begin{equation}\label{eq:real_space}
+\operatorname{span}(\{\mathbf{e}_1, \ldots, \mathbf{e}_n\}) \equiv \mathbb{R}^n.
+\end{equation}
+
+In particular two $n$-dimensional vectors, $\mathbf{u}$ and $\mathbf{v}$, are \textbf{orthogonal} if the inner product vanishes, $\langle \mathbf{u}, \mathbf{v} \rangle = 0$.  Given a vector space, $\mathbb{V}$, that includes two vector subspaces, $\mathbb{S}_1$ and $\mathbb{S}_2$, such that $\mathbb{S}_1, \mathbb{S}_2 \subset \mathbb{V}$ are orthogonal if all vectors taken from one are orthogonal to any taken from the other,
+
+\begin{equation}\label{eq:orthogonal_subspaces}
+\begin{rcases} \mathbf{v}_1 \in \mathbb{S}_1 \\ \mathbf{v}_2 \in \mathbb{S}_2 \end{rcases}
+\Rightarrow \langle \mathbf{v}_1, \mathbf{v}_2 \rangle = 0.
+\end{equation}
+
+It is particularly useful to separate vector spaces into disjoint, orthogonal subspaces for which the only common point is the origin, $\mathbf{0}$.
+
+It is standard to express the domain or range of operators over $n$-dimensional vector spaces, or covector spaces, as $\mathbb{R}^n$.
+
+\subsubsection{Interpretation of Covectors}\label{sec:interpretation-covectors}
+From the algebraic expressions in (\ref{eq:vector_arithmetic_row}) row vectors, or covectors, are also mathematical `vectors' since it is possible to define consistent operations of addition and scalar multiplication.  But what is their interpretation in the geometric view, in which positional points are explicitly represented as column vectors?
+
+The covector can be interpreted as an operator on vectors.  In particular the natural basis of covectors, $\mathbf{f}_1^\top, \ldots, \mathbf{f}_n^\top$, in (\ref{eq:natural_basis_covectors}) are \textbf{coordinate operators}: given an arbitrary vector, $\mathbf{v}$, the $j^{th}$ basis covector, $\mathbf{f}_j^\top$, yields upon application,
+
+\begin{equation}\label{eq:coordinate_operator}
+\mathbf{f}_j^\top \mathbf{v} \equiv \langle \mathbf{f}_j, \mathbf{v} \rangle = v_j,
+\end{equation}
+
+which is the $j^{th}$ coordinate of the vector.
+
+More complicated row vectors then form weighted sums of vector coordinates, and the space of covectors is interpreted as the space of 1-dimensional scalar functions, or `functionals', on vectors.  
+
+\textbf{The Riesz Representation Theorem} states that \textit{all} linear vector functionals can be represented as covectors, or as vectors in the left-hand argument of an inner product.  The conversion of vectors to covectors and \textit{v.v.} by the transpose operator implies that the space of vectors and covectors are dual to one another -- each contains identical information that is retained on mapping from one space to another.
+
+\subsection{Outer Product (Dyad)}\label{sec:outer-product}
+Given an $m \times 1$ column vector, $\mathbf{u}$, and an $n \times 1$ row vector, $\mathbf{v}^\top$, the outer product is defined as a function that transforms vectors and covectors into matrices, $\mathbb{R}^m \times \mathbb{R}^n \rightarrow \mathbb{R}^{m \times n}$:
+
+\begin{equation}\label{eq:outer_product}
+\mathbf{u} \mathbf{v}^\top \equiv \mathbf{u} \rangle \langle \mathbf{v} \equiv \begin{pmatrix} u_1 v_1 & \cdots & u_1 v_n \\ \vdots & \ddots & \vdots \\ u_m v_1 & \cdots & u_m v_n \end{pmatrix} .
+\end{equation}
+
+The outer product is a bilinear operator, but is not generally symmetric.  
+
+All matrices can be expressed as the sum of dyads, and in general the vectors and covectors that make up the dyads are not unique.  However, if either the vectors or the covectors of the dyads are taken from the natural bases of the vector or covector spaces, then the sum is unique: an arbitrary $m \times n$ matrix, $A$, can be expressed uniquely as the outer product of the $m \times 1$ column vectors, $\mathbf{c}_1, \cdots, \mathbf{c}_n$, and the $1 \times m$ natural basis covectors, $\mathbf{f}_1^\top, \cdots, \mathbf{f}_n^\top$,
+
+\begin{equation}\label{eq:matrix_from_column_basis}
+A  \equiv \begin{pmatrix} \mathbf{c}_1 & \cdots & \mathbf{c}_n \end{pmatrix} \Rightarrow A \equiv \sum_{i=1}^n \mathbf{c}_i \mathbf{f}_i^\top \equiv \sum_{1=1}^n \mathbf{c}_i \rangle \langle \mathbf{f}_i,
+\end{equation}
+
+or uniquely as the outer product of the $1 \times n$ row vectors, $\mathbf{r}_1^\top, \cdots, \mathbf{r}_m^\top$, and the $n \times 1$ natural basis vectors, $\mathbf{e}_1, \cdots, \mathbf{e}_m$,
+
+\begin{equation}\label{eq:matrix_from_row_basis}
+A  \equiv \begin{pmatrix} \mathbf{r}_1^\top \\ \vdots \\ \mathbf{r}_m^\top \end{pmatrix} \Rightarrow A \equiv \sum_{i=1}^m \mathbf{e}_i \mathbf{r}_i^\top \equiv \sum_{1=1}^m \mathbf{e}_i \rangle \langle \mathbf{r}_i,
+\end{equation}
+
+A \textbf{diagonal} matrix, $D$, is one for which the off-diagonal entries are zero, so that, $d_{ij} = 0, i \neq j$.  Diagonal matrices can be expressed as a weighted sum of dyads formed from both the natural basis vectors and covectors.  For example the $\operatorname{diag}$ operator converts the entries of a vector, $\mathbf{v} = (v_1 \cdots v_n)^\top$, to a diagonal matrix by matching the entries in the vector with the basis vectors and covectors coordinate by coordinate:
+
+\begin{equation}\label{eq:outer_product_diagonal}
+\operatorname{diag} (\mathbf{v}) \equiv \sum_{i=1}^n v_i \mathbf{e}_i \rangle \langle \mathbf{f}_i \equiv \sum_{i=1}^n v_i \mathbf{e}_i \mathbf{f}_i^\top = D,
+\end{equation}
+
+so the resulting matrix, $D$, has diagonal entries, $d_{ii} = v_i$.
+
+\subsection{Matrix Multiplication}\label{sec:matrix-multiplication}
+\subsubsection{Matrix-Vector Multiplication}\label{sec:matrix-vector-multiplication}
+An $m \times n$ matrix, $A$, is a linear operator that transform vectors from $n$-dimensional spaces to $m$-dimensional spaces, $A: \mathbb{R}^n \rightarrow \mathbb{R}^m$. Using the column and row naming conventions discussed in $\S$\ref{sec:vectors-covectors}, there are two equivalent ways to express the product of the matrix, $A$, and an $n$-dimensional vector, $\mathbf{x}$, that yields an $m$-dimensional vector, $\mathbf{y}$, \textit{i.e.}, $A\mathbf{x} = \mathbf{y}$:
+
+\begin{itemize}[noitemsep]
+\item as a vector whose coordinates are the inner products with matrix rows,
+\begin{equation}\label{eq:matrix_multiplication_rows}
+A  \equiv \begin{pmatrix} \mathbf{r}_1^\top \\ \vdots \\ \mathbf{r}_m^\top \end{pmatrix} \equiv \sum_{i=1}^m \mathbf{e}_i \rangle \langle \mathbf{r}_i \Rightarrow A \mathbf{x} \equiv 
+\sum_{1=1}^m \mathbf{e}_i \rangle \langle \mathbf{r}_i, \mathbf{x}  \rangle \equiv \begin{pmatrix} \mathbf{r}_1^\top \mathbf{x} \\ \vdots \\ \mathbf{r}_m^\top \mathbf{x} \end{pmatrix} = \mathbf{y};
+\end{equation}
+\item as a linear combination of matrix columns,
+\begin{equation}\label{eq:matrix_multiplication_columns}
+A \equiv \begin{pmatrix} \mathbf{c}_1 & \cdots & \mathbf{c}_n \end{pmatrix} \equiv \sum_{1=1}^n \mathbf{c}_i \rangle \langle \mathbf{f}_i \Rightarrow A \mathbf{x} \equiv \sum_{1=1}^n \mathbf{c}_i \rangle \langle \mathbf{f}_i, \mathbf{x} \rangle \equiv \sum_{i=1}^n x_i \mathbf{c}_i = \mathbf{y} .
+\end{equation}
+\end{itemize}
+
+The row-wise expression of matrix multiplication view matrices as weighted coordinate operators.  The column-wise expression shows that the $m$-dimensional vector, $\mathbf{y}$ lies within the \textbf{column space} of the matrix, which is the vector space, $\operatorname{span}(\mathbf{c}_1, \ldots, \mathbf{c}_n) \subset \mathbb{R}^m$. 
+
+The square, $n \times n$ matrix, $I_n$, which has unit diagonal entries and zero off-diagonal entries,
+
+\begin{equation}\label{eq:identity_matrix}
+I_n = \begin{pmatrix} 1 & \cdots & 0 \\ \vdots & \ddots & \vdots \\ 0 & \cdots & 1 \end{pmatrix}
+\end{equation}
+
+is the \textbf{identity matrix}.  For all $n \times 1$ column vectors, $\mathbf{v}$, matrix multiplication by the identity matrix,
+
+\begin{equation}\label{eq:identity_matrix_multiplication}
+I \mathbf{v} = \mathbf{v},
+\end{equation}
+
+returns the vector.  Usually, the size of the identity matrix is clear from context and the subscript is dropped.
+
+\subsubsection{Matrix Multiplication in Vector Spaces}\label{sec:matrix-multiplication-vector-spaces}
+Matrix multiplication is a linear operation on vectors: given an $m \times n$ matrix, $A$, and two $n \times 1$ vectors, $\mathbf{u}$ and $\mathbf{v}$, we have
+
+\begin{equation}\label{eq:matrix_multiplication_linearity}
+A \left( \mathbf{u} + \mathbf{v} \right) = A\mathbf{u} + A\mathbf{v} .
+\end{equation}
+
+Furthermore, since scalar multiplication commutes with matrix multiplication, linear combinations of vectors in the domain, which is $\mathbb{R}^n$, map into linear combinations in the range, which is $\mathbb{R}^m$.  Given two additional scalars, $\alpha_1$ and $\alpha_2$, we have
+
+\begin{equation}\label{eq:matrix_multiplication_linear_combination}
+A \left( \alpha_1 \mathbf{u} + \alpha_2 \mathbf{v} \right) = \alpha_1 A\mathbf{u} + \alpha_2 A\mathbf{v} .
+\end{equation}
+
+Provided that none of the vectors, $\mathbf{u}, \mathbf{v}, A\mathbf{u}, A\mathbf{v}$, vanish, this implies that vector (sub)spaces in $\mathbb{R}^n$ are mapped into vector (sub)spaces in $\mathbb{R}^m$: in fact, the subspace, $\operatorname{span}(\mathbf{u}, \mathbf{v})$, is mapped into the subspace, $\operatorname{span}(A\mathbf{u}, A\mathbf{v})$.
+
+The transpose matrix, $A^\top$, is an $n \times m$ matrix whose action on subspaces is closely related to the matrix, $A$.  The domain of $A^\top$ is the range of $A$ and \textit{v.v}.
+
+\begin{itemize}
+\item The \textbf{kernel} of a matrix operator is the set of domain vectors that are annihilated by the action of the matrix:
+\end{itemize}
+\begin{equation}\label{eq:matrix_kernel}
+\ker(A) = \left\{ \mathbf{x} \in \mathbb{R}^n: A \mathbf{x} = 0 \right\}; 
+\end{equation}
+\begin{itemize}
+\item The \textbf{image} of a matrix operator is the set of range vectors into which domain vectors are mapped:
+\end{itemize}
+\begin{equation}\label{eq:matrix_image}
+\operatorname{im}(A) = \left\{ \mathbf{v} \in \mathbb{R}^m: \mathbf{v} = A \mathbf{u} \text{ for all } \mathbf{u} \in \mathbb{R}^n \right\};
+\end{equation}
+\begin{itemize}
+\item The \textbf{inverse image} of a matrix operator is the image of the transpose:
+\end{itemize}
+\begin{equation}\label{eq:matrix_inverse_image}
+\operatorname{im}^{-1}(A) = \operatorname{im}(A^\top);  
+\end{equation}
+\begin{itemize}
+\item The \textbf{rank} of a matrix operator is the dimension of the inverse image:
+\end{itemize}
+\begin{equation}\label{eq:matrix_rank}
+\operatorname{rank}(A) = \dim(\operatorname{im}(A^\top)) .   
+\end{equation}
+
+From the linearity of matrix operators it is straightforward to show that the kernel, image and inverse image are vector subspaces: if any two vectors belong to the set, then so do all linear combinations.  Furthermore, the kernal and inverse image are orthogonal subspaces -- membership in one requires non-membership in the other (excepting the origin, $\mathbf{0}$):
+
+\begin{equation}\label{eq:matrix_transpose_subspaces}
+\begin{array}{l}
+\mathbb{R}^n = \ker(A) \oplus \operatorname{im}(A^\top) \Rightarrow \ker(A) \perp \operatorname{im}(A^\top) \Leftrightarrow \ker(A) = \operatorname{im}(A^\top)^\perp; \\
+\mathbb{R}^m = \ker(A^\top) \oplus \operatorname{im}(A) \Rightarrow \ker(A^\top) \perp \operatorname{im}(A) \Leftrightarrow \ker(A^\top) = \operatorname{im}(A)^\perp.
+\end{array}
+\end{equation}
+
+The operator, $\oplus$, as defined in (\ref{eq:def_oplus}), joins subspaces to form larger spaces: every vector in $\mathbb{R}^n$ can be formed from a linear combination of a vector in $\ker(A)$ and a vector in $\operatorname{im}(A^\top)$, and similarly for the range, $\mathbb{R}^m$.
+
+\begin{itemize}
+\item This information is summarized in \textbf{The Rank-Nullity Theorem}:
+\end{itemize}
+\begin{equation}\label{eq:rank_nullity_theorem}
+\operatorname{rank}(A) + \dim(\ker(A)) = n .
+\end{equation}
+
+From the definition of the column space, which is provided in $\S$\ref{sec:matrix-vector-multiplication}, the image and column space coincide, and the rank of a matrix is the number of its linearly independent column vectors.
+
+\subsubsection{Matrix-Matrix Multiplication}\label{sec:matrix-matrix-multiplication}
+Matrix-matrix multiplication is a simple extension of matrix-vector multiplication.  However, the number of columns of the left-most matrix must match the number of rows of the second.  Matrix multiplication therefore maps matrices as $\mathbb{R}^{m \times p} \times \mathbb{R}^{p \times n} \rightarrow \mathbb{R}^{m \times n}$.  Representing the matrix, $A$, in row form, and the matrix, $B$, in column form, we have
+
+\begin{equation}\label{eq:matrix_matrix_multiplication}
+\begin{rcases}
+A & \equiv \begin{pmatrix}
+\mathbf{r}_1^\top \\
+\vdots \\
+\mathbf{r}_m^\top
+\end{pmatrix} \\
+B & \equiv \begin{pmatrix}
+\mathbf{c}_1 & \cdots & \mathbf{c}_n 
+\end{pmatrix}
+\end{rcases}
+\Rightarrow
+AB = \begin{pmatrix} \mathbf{r}_1^\top \mathbf{c}_1 & \ldots & \mathbf{r}_1^\top \mathbf{c}_n \\
+\vdots & \ddots & \vdots \\
+\mathbf{r}_m^\top \mathbf{c}_1 & \cdots & \mathbf{r}_m^\top \mathbf{c}_n
+\end{pmatrix}.
+\end{equation}
+
+\subsection{Norms}\label{sec:norms}
+A \textbf{norm} is an operator, $| \cdot |$, that maps mathematical objects, $x$, into scalars, such that
+\begin{itemize}[noitemsep]
+\item $|x| \geq 0 \text{ for all } x \text{ and } |x| = 0 \Leftrightarrow x = 0$;
+\item $|\alpha x| = |\alpha| |x| \text{ for scalar } \alpha$;
+\item $|x + y| \leq |x| + |y| \text{ (Triangle Inequality) }$.
+\end{itemize}
+
+Since all vector operations are sequences of vector additions and scalar multiplications, the norm of all complex operations can be reduced to sums and products of norms of the underlying vectors and scalars.
+
+\subsubsection{Vector Norms}\label{sec:vector-norms}
+The \textbf{vector} $p$\textbf{-norm} of an $n$-dimensional vector, $\mathbf{v}$, is defined as
+
+\begin{equation}\label{eq:vector_pnorm}
+|| \mathbf{v} ||_p = \left( \sum_{i=1}^n |v_i|^p \right)^{\frac{1}{p}}
+\end{equation}
+
+\begin{itemize}[noitemsep]
+\item The 1-norm is sum of the absolute values of the coordinates, and the locus of points for which $||\mathbf{v}||_1 = 1$ forms an $n$-dimensional diamond.
+\item The 2-norm is the Euclidean distance, and the locus of points for which $||\mathbf{v}||_2 = 1$ forms an $n$-dimensional sphere.
+\end{itemize}
+
+The vector 2-norm is closely related to the inner product:
+
+\begin{align}\label{eq:vector_2norm}
+&\langle \mathbf{v}, \mathbf{v} \rangle \equiv || \mathbf{v} ||^2_2; \\
+\label{eq:inner_product_2norm}
+&\langle \mathbf{u}, \mathbf{v} \rangle \equiv ||\mathbf{u}||_2 ||\mathbf{v}||_2 \cos \theta_{\mathbf{u} \mathbf{v}}.
+\end{align}
+
+\begin{itemize}
+\item The $\infty$-norm is the maximum absolute coordinate value: assume that the $j^{th}$ coordinate is the largest in magnitude,
+\end{itemize}
+\begin{align}\label{eq:infinity_norm}
+||\mathbf{v}||_\infty &= \lim_{p\to\infty} \left( |v_1|^p + \cdots |v_j|^p + \cdots + |v_n|^p \right)^\frac{1}{p} \notag \\
+&= \lim_{p\to\infty} |v_j| \left( |\frac{v_1}{v_p}|^p + \cdots + 1 + \cdots + |\frac{v_n}{v_j}|^p \right)^\frac{1}{p} \notag \\ 
+&= |v_j|
+\end{align}
+
+\hspace{20pt}The locus of points for which $||\mathbf{v}||_\infty = 1$ is an $n$-dimensional cube.
+
+\begin{itemize}
+\item For all vectors $||\mathbf{v}||_p \geq ||\mathbf{v}||_q \text{ if } p > q$: surfaces of constant distance for different $p$-norms are nested;
+\item Convergence in one $p$-norm implies convergence in all.
+\end{itemize}
+
+\subsubsection{Matrix Norms}\label{sec:matrix-norms}
+The \textbf{induced matrix }$p$\textbf{-norm} for a matrix, $A$, is defined as the maximum action of the matrix upon all vectors with unit magnitude:
+
+\begin{equation}\label{eq:matrix_pnorm}
+||A||_p \equiv \max_{||\mathbf{v}||_p = 1} ||A\mathbf{v}||_p .
+\end{equation}
+
+\begin{itemize}[noitemsep]
+\item The matrix 1-norm is the maximum sum over all column vectors
+\item The matrix $\infty$-norm is the maximum sum over all row vectors
+\item Convergence in one norm implies convergence in all
+\end{itemize}
+
+The \textbf{Frobenius norm} for an $m \times n$ matrix, $A$, is the sum of squares of all entrants:
+
+\begin{equation}\label{eq:Frobenius_norm}
+||A||_F \equiv \sqrt{\sum_{i=1}^n \sum_{j=1}^m a_{ij}^2} .
+\end{equation}
+
+The Frobenius norm is identical to the 2-norm for a vector whose coordinates are equal to the matrix entries.
+
+The \textbf{compatibility property} of matrix-vector multiplication:
+\begin{equation}\label{eq:compatibility_property}
+|A \mathbf{x}| \leq |A||\mathbf{x}|
+\end{equation}
+
+\begin{itemize}
+\item Both induced $p$-norms and the Frobenius norms are compatible
+\end{itemize}
+
+An additional property of norms for square matrices, $A$ and $B$,
+
+\begin{equation}\label{eq:square_matrix_bound}
+|AB| \leq |A| |B|.
+\end{equation}
+
+
+
+
+\subsection{Inverses}\label{sec:inverses}
+If a matrix, $A$, is square with linearly independent column vectors, then there exists a unique \textbf{inverse matrix}, $A^{-1}$, such that 
+\begin{equation}\label{eq:matrix_inverse}
+A^{-1}A = AA^{-1} = I.
+\end{equation}
+
+If column vectors are not linearly independent, the matrix is said to be \textbf{singular}, and no such inverse matrix exists.
+
+The inverse of a matrix product of square matrices is the product of the inverses in reverse order,
+\begin{equation}\label{eq:matrix_inverse_product}
+\left( AB \right)^{-1} = B^{-1}A^{-1},
+\end{equation}
+provided the individual inverses exist.
+
+
+\subsection{Wedge Products and Determinants}\label{sec:determinants}
+A common test for the singularity of a matrix, and thus the existence of an inverse, is provided by the determinant: a sum of products of matrix entries selected so that no single contribution samples values from the same row or column.  The properties of the determinant are due to an underlying vector operator:
+
+The \textbf{wedge product} is  a bilinear vector operator on $n \times 1$ vectors such that:
+
+\begin{itemize}
+\item The wedge product is antisymmetric:
+\end{itemize}
+\begin{equation}\label{eq:wedge_product_antisymmetry}
+\mathbf{u} \wedge \mathbf{v} = -\mathbf{v} \wedge \mathbf{u} \Rightarrow \mathbf{u} \wedge \mathbf{u} = \mathbf{0}
+\end{equation}
+\begin{itemize}
+\item The wedge product is distributive with respect to scalar multiplication and vector addition:
+\begin{multline}\label{eq:wedge_product_distributive}
+\left( \alpha_1 \mathbf{u}_1 + \alpha_2 \mathbf{u}_2 \right) \wedge \left( \beta_1 \mathbf{v}_1 + \beta_2 \mathbf{v}_2 \right) \\
+= \alpha_1 \beta_1 \left( \mathbf{u}_1 \wedge \mathbf{v}_1 \right) + \alpha_1 \beta_2 \left( \mathbf{u}_1 \wedge \mathbf{v}_2 \right) + \alpha_2 \beta_1 \left( \mathbf{u}_2 \wedge \mathbf{v}_1 \right) + \alpha_2 \beta_2 \left( \mathbf{u}_2 \wedge \mathbf{v}_2 \right) 
+\end{multline}
+\item The wedge product is associative and can be chained to combine an arbitrary number of vector arguments
+\end{itemize}
+\begin{equation}\label{eq:wedge_product_arbitrary}
+\bigwedge_{i=1}^k \mathbf{v}_i \equiv \mathbf{v}_1 \wedge \cdots \wedge \mathbf{v}_k
+\end{equation}
+\begin{itemize}[noitemsep]
+\item In the case for which $n=k$ in (\ref{eq:wedge_product_arbitrary}) the wedge product taken across the vectors, $\mathbf{v}_1, \ldots, \mathbf{v}_n$, each $n \times 1$, is a multiple of the wedge product of the underlying unit vectors,  $\mathbf{e}_1, \ldots, \mathbf{e}_n$,
+\begin{equation}
+\begin{rcases}
+\mathbf{v}_i = \begin{pmatrix} v_{i1} \\ \vdots \\ \ v_{in} \end{pmatrix} \equiv \displaystyle\sum_{j=1}^n v_{ij} \mathbf{e}_j \\
+S_n = \left\{ \text{all permutations of } [1, \ldots, n] \right\} \\
+\bm{\sigma} = \begin{pmatrix} \sigma_1 \\ \vdots \\ \sigma_n \end{pmatrix} \text{ is a permutation vector}
+\end{rcases} \Rightarrow \mathbf{v}_1 \wedge \cdots \wedge \mathbf{v}_n =
+\left( \sum_{\bm{\sigma} \in S_n} \operatorname{sgn}(\bm{\sigma}) \prod_{i=1}^n v_{i \sigma_i} \right) \mathbf{e}_1 \wedge \cdots \wedge \mathbf{e}_n
+\end{equation}
+\item The wedge product of a linearly dependent set of vectors must vanish: at least one vector can be expressed as a linear sum of the others, so that at least one vector is repeated in the chain of wedge products;
+\item The wedge product of \textit{any} set of $n+1$ vectors, each $n \times 1$, vanishes, since the set must be linearly dependent.
+\end{itemize}
+
+
+The \textbf{determinant} of an $n \times n$ square matrix, $A = \begin{pmatrix} \mathbf{c}_1 & \cdots & \mathbf{c}_n \end{pmatrix}$, is the wedge product of its column vectors,
+\begin{equation}\label{eq:determinant}
+\det \left( A \right) \equiv \bigwedge_{i=1}^n \mathbf{c}_i 
+\end{equation}
+\begin{itemize}
+\item The \textbf{geometric interpretation of the determinant}: the magnitude of the determinant of the matrix, $A$, is the volume of the $n$-dimensional parallelepiped with a vertex at the origin and edges that coincide with the column vectors, $\mathbf{c}_i$,
+\begin{equation}\label{eq:volume_determinant}
+\text{Volume: } | \mathbf{e}_1 \wedge \cdots \wedge \mathbf{e}_n | = 1 \Rightarrow| \det (A) | = \left| \bigwedge_{i=1}^n \mathbf{c}_i \right| = \left| \sum_{\bm{\sigma} \in S_n} \operatorname{sgn}(\bm{\sigma}) \prod_{i=1}^n v_{i \sigma_i} \right|
+\end{equation}
+\item A matrix is \textbf{singular} if the column vectors are \textit{not} linearly independent, and the determinant of the matrix, as calculated in (\ref{eq:volume_determinant}), is 0;
+\item The determinant distributes with matrix multiplication, so that for square matrices, $A$ and $B$, we have
+\begin{equation}
+\operatorname{det} (AB) = \left( \operatorname{det} A \right) \left( \operatorname{det} B \right).
+\end{equation}
+\end{itemize}
+
+The $n-$dimensional volume of a parallelepiped enclosed by the column vectors of a non-square $m \times n$ matrix, $A$, is given by the operation,
+\begin{equation}\label{eq:nonsquare_parallelepiped_volume}
+\text{Volume: } | \operatorname{det} (A^\top A) |^\frac{1}{2},
+\end{equation}
+provided the matrix is full rank, and the dimension of the column space is less than the row space, \textit{i.e.,} $\operatorname{rank} (A) = n < m$.
+
+\subsection{Quadratic Forms}\label{sec:quadratic-forms}
+Given an $n \times n$ matrix, $A$, the \textbf{adjoint matrix}, $A^*$, is one that satisfies the inner product relation,
+\begin{equation}\label{eq:adjoint_matrix}
+\langle A \mathbf{u}, \mathbf{v} \rangle = \langle \mathbf{u}, A^* \mathbf{v} \rangle,
+\end{equation}
+for all $n \times 1$ column vectors, $\mathbf{u}$ and $\mathbf{v}$,
+
+\begin{itemize}
+\item For real matrices the adjoint is the transpose:
+\end{itemize}
+\begin{equation}\label{eq:adjoint_matrix_real}
+\langle A \mathbf{u}, \mathbf{v} \rangle = (A \mathbf{u})^\top \mathbf{v} = \mathbf{u}^\top A^\top \mathbf{v} = \langle \mathbf{u}, A^\top \mathbf{v} \rangle \Rightarrow A^* = A^\top;
+\end{equation}
+\begin{itemize}
+\item \textbf{Self-adjoint matrices} are symmetric, 
+\end{itemize}
+\begin{equation}\label{eq:self-adjoint_matrix_symmetric}
+\langle A \mathbf{u}, \mathbf{v} \rangle = \langle \mathbf{u}, A \mathbf{v} \rangle \Rightarrow A = A^\top.
+\end{equation}
+
+An $n \times n$ \textbf{quadratic form}  is a bilinear vector operator that maps two $n \times 1$ column vectors to scalars.  All quadratic forms can be represented as inner products with self-adjoint matrices, $A$,
+\begin{equation}\label{eq:quadratic_form}
+\langle A \mathbf{u}, \mathbf{v} \rangle = \langle \mathbf{u}, A \mathbf{v} \rangle \equiv \langle \mathbf{u}, \mathbf{v} \rangle_A,
+\end{equation}
+again for arbitrary vectors, $\mathbf{u}$ and $\mathbf{v}$.
+\begin{itemize}
+\item A matrix is \textbf{positive definite} if the quadratic form is positive for all nonzero vectors,
+\end{itemize}
+\begin{equation}\label{eq:positive_definite}
+\langle A \mathbf{v}, \mathbf{v} \rangle > 0, \mathbf{v} \neq \mathbf{0}.
+\end{equation}
+\begin{itemize}
+\item Quadratic forms with positive-definite matrices satisfy the requirements of a norm, as described in $\S$\ref{sec:norms}.
+\end{itemize}
+
+\subsection{Bases}\label{sec:bases}
+The basis for a vector space is defined in $\S$\ref{sec:vector-spaces}: a linearly independent set of vectors whose linear combinations generate all vectors in the space.  
+
+Bases of vector spaces are not unique, and there exists a preferred basis, which is the natural basis for the vector space as described in (\ref{eq:natural_basis_vectors}).  By construction the natural basis vectors align with the coordinate system.  It is possible, however, to express vectors in other coordinate systems that align with different complete sets of linearly independent vectors -- in other words, with any basis.  The coordinates of a vector in the alternative coordinate system are the weights in the linear combination of the basis vectors that generates it.  We'll describe two cases below, one for which the basis vectors are orthonormal, and one for which they are not.
+
+\subsubsection{Orthonormal Bases}\label{sec:orthonormal-bases}
+An \textbf{orthonormal basis} for an $n$-dimensional vector space is any collection of vectors, $\mathbf{u}_1, \ldots, \mathbf{u}_n$, that are of unit length and are mutually perpendicular:
+\begin{equation}\label{eq:orthonormal_basis}
+\langle \mathbf{u}_i, \mathbf{u}_j \rangle = \delta_{ij} \equiv \begin{cases} 1, & i=j \\ 0, & i\neq j \end{cases}
+\end{equation}
+
+Forming the $n \times n$ matrix, $U$, from the orthogonal vectors,
+\begin{equation}\label{eq:basis_column_space}
+U = \begin{pmatrix} \mathbf{u}_1 & \cdots & \mathbf{u}_n \end{pmatrix} = \sum_{i=1}^n \mathbf{u}_i \mathbf{f}_i^\top \equiv \sum_{i=1}^n \mathbf{u}_i \rangle \langle \mathbf{f}_i,
+\end{equation}
+
+it's clear that the transpose matrix is the inverse, $U^\top = U^{-1}$, since
+
+\begin{align}\label{eq:basis_inverse}
+U^\top U &=  \sum_{i=1}^n \sum_{j=1}^n \mathbf{e}_i \rangle \langle \mathbf{u}_i , \mathbf{u}_j \rangle \langle \mathbf{f}_j  =   \sum_{i=1}^n\mathbf{e}_i \rangle \langle \mathbf{u}_i , \mathbf{u}_i \rangle \langle \mathbf{f}_i = \sum_{i=1}^n \mathbf{e}_i \rangle \langle \mathbf{f}_i = I; \\
+UU^\top &= \sum_{i=1}^n \sum_{j=1}^n \mathbf{u}_i \rangle \langle \mathbf{f}_i , \mathbf{e}_j \rangle \langle \mathbf{u}_j  = \sum_{i=1}^n \mathbf{u}_i \rangle \langle \mathbf{f}_i , \mathbf{e}_i \rangle \langle \mathbf{u}_i = \sum_{i=1}^n \mathbf{u}_i \rangle \langle \mathbf{u}_i \equiv \sum_{i=1}^n \mathbf{u}_i \mathbf{u}_i^\top = I.
+\end{align}
+
+We can interpret the transpose matrix, $U^\top$, as a column of covectors, each of which operates as a coordinate function for the associated basis vector:
+
+\begin{equation}\label{eq:basis_coordinates}
+\mathbf{x} = I \mathbf{x} = UU^\top \mathbf{x} = \sum_{i=1}^n \mathbf{u}_i \mathbf{u}_i^\top \mathbf{x} = \sum_{i=1}^n \mathbf{u}_i \rangle \langle \mathbf{u}_i, \mathbf{x} \rangle = \sum_{i=1}^n a_i \mathbf{u}_i,
+\end{equation}
+
+for which the value, $a_i = \langle \mathbf{u}_i, x \rangle$ is the coordinate of the vector, $\mathbf{x}$, expressed in the coordinate system aligned with the orthonormal basis vectors, $\mathbf{u}_1, \ldots, \mathbf{u}_n$.
+
+\subsubsection{Non-orthonormal Basis}\label{sec:non-orthonormal_bases}
+Given any collection of $n$ linearly independent $n \times 1$ vectors, $\mathbf{u}_1, \ldots, \mathbf{u}_n$, there exists an associated collection of \textbf{bi-orthogonal} $n \times 1$ vectors, $\mathbf{v}_1, \ldots, \mathbf{v}_n$, such that
+
+\begin{equation}\label{eq:bi-orthogonal_basis}
+\langle \mathbf{v}_i, \mathbf{u}_j \rangle = \delta_{ij} \equiv \begin{cases} 1, & i=j \\ 0, & i\neq j \end{cases}
+\end{equation}
+
+\begin{equation}\label{eq:bi-orthogonal_basis_column_space}
+V = \begin{pmatrix} \mathbf{v}_1 & \cdots & \mathbf{v}_n \end{pmatrix} = \sum_{i=1}^n \mathbf{v}_i \mathbf{f}_i^\top \equiv \sum_{i=1}^n \mathbf{v}_i \rangle \langle \mathbf{f}_i
+\end{equation}
+
+This implies that the bi-orthogonal tranpose, $V^\top$, is the inverse of the matrix, $U$: $V^\top = U^{-1}$.
+
+\begin{align}\label{eq:bi-orthogonal_basis_inverse}
+&V^\top U = \sum_{i=1}^n \mathbf{e}_i \rangle \langle \mathbf{v}_i , \mathbf{u}_i \rangle \langle \mathbf{f}_i = \sum_{i=1}^n \mathbf{e}_i \rangle \langle \mathbf{f}_i & = I; \\
+&UV^\top = \sum_{i=1}^n \mathbf{u}_i \rangle \langle \mathbf{f}_i , \mathbf{e}_i \rangle \langle \mathbf{v}_i = \sum_{i=1}^n \mathbf{u}_i \rangle \langle \mathbf{v}_i \equiv \sum_{i=1}^n \mathbf{u}_i \mathbf{v}_i^\top & = I.
+\end{align}
+
+We can interpret the transpose of the bi-orthogonal matrix, $V^\top$, as a column of covectors, each of which operators as a coordinate function for the associated basis vector:
+
+\begin{equation}\label{eq:bi-orthogonal_basis_coordinates}
+\mathbf{x} = I \mathbf{x} = UV^\top \mathbf{x} = \sum_{i=1}^n \mathbf{u}_i \mathbf{v}_i^\top \mathbf{x} = \sum_{i=1}^n \mathbf{u}_i \rangle \langle \mathbf{v}_i, \mathbf{x} \rangle = \sum_{i=1}^n a_i \mathbf{u}_i,
+\end{equation}
+
+for which the value, $a_i = \langle \mathbf{v}_i, \mathbf{x} \rangle$ is the coordinate of the vector, $\mathbf{x}$, expressed in the coordinate system aligned with the non-orthonormal basis vectors, $\mathbf{u}_1, \ldots, \mathbf{u}_n$.
+
+\subsubsection{Chage of Basis}\label{sec:change_of_basis}
+The equations in (\ref{eq:basis_coordinates}) and (\ref{eq:bi-orthogonal_basis_coordinates}) show that arbitrary vectors in a vector space can be expressed as weighted sums of arbitrary bases, given coordinate functions -- covectors -- formed from the orthogonal or bi-orthogonal set.  A \textbf{change of basis} occurs when
+\begin{itemize}[noitemsep]
+\item The coordinates of all vectors in the space are expressed in terms of the basis vectors;
+\item The basis vectors are rewritten as, $\mathbf{u}_1, \ldots, \mathbf{u}_n \rightarrow \mathbf{e}'_1, \ldots, \mathbf{e}'_n$.
+\end{itemize}
+
+To change the basis of a coordinate system from the natural basis to an arbitrary basis, $\mathbf{u}_1, \ldots, \mathbf{u}_n$, we construct the matrix, $U$, whose column vectors are the basis vectors, and perform the following operations:
+\begin{itemize}
+\item The new coordinates for a vector:
+\end{itemize}
+\begin{equation}\label{eq:basis_change_vector}
+\mathbf{x}' = U^{-1} \mathbf{x}
+\end{equation}
+\begin{itemize}
+\item The new coordinates for a covector:
+\end{itemize}
+\begin{equation}\label{eq:basis_change_covector}
+\mathbf{y}'^{\top} = \mathbf{y} U
+\end{equation}
+\begin{itemize}
+\item The new coordinates for a matrix:
+\end{itemize}
+\begin{equation}\label{eq:basis_change_matrix}
+A' = U^{-1}AU
+\end{equation}
+
+As described in $\S\S$\ref{sec:orthonormal-bases} \& \ref{sec:non-orthonormal_bases}, the inverse matrix is the transpose of the matrix, $U^{-1} = U^\top$, for an orthonormal change of basis, or the transpose of the bi-orthogonal matrix, $U^{-1} = V^\top$, for a non-orthonormal change of basis.  A change of basis is also known as a \textbf{similarity transformation}.
+ 
+\subsection{Matrix Trace}\label{sec:matrix_trace}
+The \textbf{trace} of an $n$-dimensional square matrix, $A$, is the sum of the diagonal elements,
+\begin{equation}\label{eq:trace_definition}
+\operatorname{tr}(A) = \sum_{i=1}^n A_{ii}.
+\end{equation}
+
+If we are given two matrices whose product is square, an $n \times m$ matrix, $X$, and an $m \times n$ matrix, $Y$, then the trace of the product is the linear combination of all combinations of elements from both matrices for which the column of one matches the row of the other, and \textit{v.v.},
+\begin{equation}\label{eq:trace_product_definition}
+\operatorname{tr}(XY) = \sum_{i=1}^m \sum_{j=1}^n X_{ij} Y_{ji}.
+\end{equation}
+
+There are a number of properties that immediately follow from the definitions in (\ref{eq:trace_definition}) and (\ref{eq:trace_product_definition}):
+\begin{itemize}
+\item Since the diagonal elements are unchanged by transposition, the trace is invariant as well:
+\begin{equation} \operatorname{tr}(A^\top) = \operatorname{tr}(A); \end{equation}
+\item If the matrices, $X$ and $Y$, are both square, then the trace of the product is unaffected by transposition:
+\begin{equation} \operatorname{tr}(XY) = \operatorname{tr}(X^\top Y) = \operatorname{tr}(X Y^\top); \end{equation} 
+\item Since the position of the elements are unchanged by commutation, the trace of the product of matrices is invariant:
+\begin{equation} \operatorname{tr}(XY) = \operatorname{tr}(YX); \end{equation}
+\item Since matrix multiplication is associative, the trace is invariant under cyclic permutation of the product:
+\begin{equation} \operatorname{tr}(XYZ) = \operatorname{tr}((XY)Z) = \operatorname{tr}(Z(XY)) = \operatorname{tr}(ZXY); \end{equation}
+\item The trace is invariant under change of basis (\textit{cf} $\S$ \ref{sec:change_of_basis}): given a coordinate system with basis vectors encoded in the columns of a matrix, $U$, we have
+\begin{equation} \operatorname{tr}(A') = \operatorname{tr}(U^{-1}AU) = \operatorname{tr}(AUU^{-1}) = \operatorname{tr}(A); \end{equation}
+\item For two $n \times 1$ vectors, $\mathbf{x}$ and $\mathbf{y}$, the trace of an outer product is the inner product,
+\begin{equation} \operatorname{tr}(\mathbf{x} \mathbf{y}^\top) = \operatorname{tr}(\mathbf{y}^\top \mathbf{x}) = \mathbf{y}^\top \mathbf{x}. \end{equation}
+
+\end{itemize}
+
+
+\subsection{Projection Operators}\label{sec:projection-operators}
+A \textbf{projection operator} is one for which repeated application yields the same result as a single application:
+
+\begin{equation}\label{eq:idempotent_operator}
+P^2 = P.
+\end{equation}
+
+Like all matrix operators, an $m \times n$ projection operator, P, with $n > m$, divides the $n$-dimensional domain into two orthogonal subspaces, $\ker(P)$ and $\operatorname{im}(P^\top)$, the kernel and the inverse image of the operator and transposed operator, respectively (see $\S$\ref{sec:matrix-multiplication-vector-spaces}).  In particular, the operator, $P$, 
+\begin{itemize}[noitemsep]
+\item annihilates all vectors that lie within the kernel: $\mathbf{x} \in \ker(P) \Rightarrow P\mathbf{x} = 0$;
+\item acts as an identity operator for all vectors that lie within the inverse image: $\mathbf{x} \in \operatorname{im}(P^\top) \Rightarrow P\mathbf{x} = \mathbf{x}$.
+\end{itemize}
+
+In this way vectors are `projected' into an $m$-dimensional subspace `imbedded' within the $n$-dimensional domain.  A second application of the projection operator has no additional effect, since the part of the original vector that lies within the kernel has already been annihilated, and the part that lies within the inverse image is unchanged by the operator in either application.
+
+Let the linearly independent set of $n$ $m \times 1$ vectors, $\mathbf{u}_1, \ldots, \mathbf{u}_n$, form the column vectors of an $m \times n$ matrix, $U$. Then the projection matrix takes the form,
+
+\begin{equation}\label{eq:projection_matrix}
+P = U(U^\top U)^{-1} U^\top,
+\end{equation}
+
+and projects arbitrary $n \times 1$ vectors, $\mathbf{x}$, into the $m$-dimension column space of the matrix, $U$.  To prove the claim we check the properties one-by-one:
+\begin{itemize}[noitemsep]
+\item Repeated application yields the same result as s single application:
+
+\begin{equation}\label{eq:test_projection_idempotency}
+P^2 = U(U^\top U)^{-1} U^\top U(U^\top U)^{-1} U^\top = U(U^\top U)^{-1} U^\top = P;
+\end{equation}
+
+\item Operation on vectors \textit{in the orthogonal complement} of the column space of $U$ is annihilation (this is the same space as $\ker(P)$):
+\item[]
+\item[] If $\mathbf{x} \in \ker(U^\top)$, then $U^\top \mathbf{x} = 0$, then
+\begin{equation}\label{eq:test_projection_annihilation}
+P\mathbf{x} = U(U^\top U)^{-1} U^\top \mathbf{x} = 0.
+\end{equation}
+
+\item Operation on vectors \textit{within} the column space of $U$ is the identity (this is the same space as $\operatorname{im}(P^\top)$):
+\item[]
+\item[] From the equations in (\ref{eq:basis_coordinates}) and (\ref{eq:bi-orthogonal_basis_coordinates}) any vector, $\mathbf{x}$, that lies within the column space of $U$ can be expressed as a linear combination of the column vectors, $\mathbf{x} = \sum_{i=1}^n a_i \mathbf{u}_i \equiv U\mathbf{a}$.  For a general matrix, $U$, the weights are generated by the bi-orthogonal covectors, $a_i = \mathbf{v}_i^\top \mathbf{x}$ from (\ref{eq:bi-orthogonal_basis_coordinates}). Applying the projection operator to the vector, $\mathbf{x}$, then yields 
+
+\begin{equation}\label{eq:test_projection_identity}
+P\mathbf{x} = U(U^\top U)^{-1} U^\top U\mathbf{a} = U \mathbf{a} = \mathbf{x};
+\end{equation}
+
+\item Projection into the \textit{complementary} subspace, $U^{\perp}$, is achieved by the related operator,
+\begin{equation}\label{eq:complementary_projection}
+P^\perp = I - P = I - U(U^\top U)^{-1} U^\top.
+\end{equation}
+
+\end{itemize}
+
+Simplifications of the projection operator:
+\begin{itemize}[noitemsep]
+\item If the set contains only a single vector, $\mathbf{u}$, the projection operator takes the form of a rank-1 matrix, $P =  \mathbf{u}(\mathbf{u}^\top \mathbf{u})^{-1} \mathbf{u}^\top$;
+\item If the vectors, $\mathbf{u}_1, \ldots, \mathbf{u}_n$, form an \textit{orthonormal} set, then the normalizing factor, $U^\top U = I$, drops out, and $P = UU^\top$;
+\item If the set contains only a single \textit{unit} vector, $\mathbf{u}$, then the projection operator is a simple dyad: $P = \mathbf{u}\mathbf{u}^\top$.
+\end{itemize}
+
+In the remainder of the text projection operators are differentiated by the matrix whose column space forms the basis of the projected subspace: $P_U$.
+
+\subsubsection{Gram-Schmidt Orthogonalization}\label{sec:gram-schmidt-orthogonalization}
+Given a linearly independent set of $k$ vectors, $\mathbf{v}_1, \ldots, \mathbf{v}_k$, it is always possible to construct an orthonormal basis for the vector space, $\operatorname{span}(\mathbf{v}_1, \ldots, \mathbf{v}_k)$.  The \textbf{Gram-Schmidt Orthogonalization Procedure} is an iterative program by which orthogonal vectors are constructed in sequence, and later vectors are formed by subtracting projections into subspaces formed from earlier ones:
+
+Defining the projection operator onto the $i^{th}$ orthogonal basis vector, 
+
+\begin{equation}\label{eq:Gram_Schmidt_projection_operator}
+P_{\mathbf{u}_i} = \mathbf{u}_i \left( \mathbf{u}_i^\top \mathbf{u}_i \right)^{-1} \mathbf{u}_i^\top,
+\end{equation}
+
+carry out the following operations:
+\begin{itemize}[noitemsep]
+\item $\mathbf{u}_1 = \mathbf{v}_1$
+\item $\mathbf{u}_2 = \left( I - P_{\mathbf{u}_1} \right) \mathbf{v}_2$
+\item $\mathbf{u}_i = \left( I - \sum_{j=1}^{i-1} P_{\mathbf{u}_j} \right) \mathbf{v}_i$
+\end{itemize}
+for $1 \leq i \leq k$.  If an orthonormal set is desired, simply normalize the vectors, $\hat{\mathbf{u}}_i = \frac{\mathbf{u}_i}{|\mathbf{u}_i|} $.
+
+Since an arbitrary basis vector, $\mathbf{v}_i$, is split into two parts -- one that is projected into a lower-dimension vector space spanned by vectors, $\mathbf{v}_1, \cdots, \mathbf{v}_{i-1}$, and one that lies in the orthogonal complement -- the wedge product  (\textit{cf.} $\S$\ref{sec:determinants}) of original and orthogonalized vectors is identical:
+\begin{equation}
+\bigwedge_{i=1}^k \mathbf{u}_i = \bigwedge_{i=1}^k \left( I - \sum_{j=1}^{i-1} P_{\mathbf{u}_j} \right) \mathbf{v}_i = \bigwedge_{i=1}^k \mathbf{v}_i.
+\end{equation}
+
+As a consequence the volume of the $k$-dimensional parallelepiped enclosed by the columns of $V = (\mathbf{v}_1, \ldots, \mathbf{v}_k)$ is the product of the orthogonal vectors, prior to normalization, so that
+\begin{equation}\label{eq:GS_volume}
+\text{Volume: } | \operatorname{det} (V) | = \prod_{i=1}^k | \mathbf{u}_i |.
+\end{equation}
+
+\section{Eigensystems}\label{sec:eigensystems}
+We've shown above in $\S$\ref{sec:matrix-multiplication-vector-spaces} that the action of matrices on vector spaces partitions the domain and range into disjoint subspaces, defined by the kernel and image of the matrix operator and its transpose.  However, for square matrices -- those for which the domain and range share dimension -- we can provide a finer subspace decomposition of the orthogonal complement to the kernel.  Upon formally identifying the domain with the range, the \textbf{eigensystem} of a matrix is defined as set of subspaces closed under action of the matrix that is paired with a characteristic value that quantifies the mapping: vectors that lie in a given subspace are mapped in proportion to the characteristic value to other vectors in the subspace.  The vectors are known as \textbf{eigenvectors} and the characteristic value is known as an \textbf{eigenvalue}.  The eigensystem includes
+\begin{itemize}[noitemsep]
+\item Distinct real eigenvalues, each associated with a single 1-dimensional eigenvector;
+\item Complex-conjugate pairs of eigenvalues, each pair associated with a 2-dimensional subspace;
+\item Shared real eigenvalues of multiplicity $k$, each group associated with a $k$-dimensional subspace, any basis of which can serve as eigenvectors;
+\item Shared real \textbf{generalized eigenvalues} of multiplicity $k$, each associated with a $k$-dimensional subspace.  There is always one true eigenvector in the space, while the remaining $k-1$ \textbf{generalized eigenvectors} can be ordered such that the matrix maps vectors in one subspace into vectors in the subsequent subspace, terminating in the 1-dimensional subspace that contains the true eigenvector.
+\end{itemize}
+
+The eigenvalues, $\lambda$, and eigenvectors, $\mathbf{u}$, of an $n \times n$ matrix, A, are eigensystems that satisfy the equation,
+
+\begin{equation}\label{eq:eigensystem_equation}
+A \mathbf{u} = \lambda \mathbf{u} \Rightarrow (A - \lambda I) \mathbf{u} = 0.
+\end{equation}
+
+To determine the constants, $\lambda$, for which $\ker(A - \lambda I)$ is not trivial, we must solve the \textbf{characteristic equation}, which requires the singularity condition for the operator,
+
+\begin{equation}\label{eq:characteristic_equation}
+\det(A - \lambda I) = 0.
+\end{equation}
+
+The equation in (\ref{eq:characteristic_equation}) is algebraic of order $n$ with real coefficients, whose solutions may take the following form:
+\begin{itemize}[noitemsep]
+\item Distinct real numbers, which lead to distinct 1-dimensional invariant subspaces;
+\item Complex conjugate pairs, which lead to 2-dimensional invariant subspaces;
+\item Real numbers of multiplicity $k$, which lead to $k$-dimensional invariant subspaces, any basis of which can be taken as the set of eigenvectors.
+\end{itemize}
+
+The vector subspaces associated with real eigenvectors are linked to a `stretching' action of the matrix, while a vector subspace associated with complex-conjugate pairs is linked to a `rotational' action of the matrix.  The distinction between eigensystems and generalized eigensystems (the generalized case is a kind of degeneracy not typically observed in physically relevant models) is delayed to $\S$\ref{sec:eigensystems-generalized}.
+
+\subsection{General Eigensystems of Matrices with Real Eigenvalues}\label{sec:eigensystems-real-eigenvalues}
+Here we consider matrices for which the characteristic equation in (\ref{eq:characteristic_equation}) has the properties:
+\begin{itemize}[noitemsep]
+\item All $n$ eigenvalues are real, and there are no complex conjugate pairs;
+\begin{itemize}[noitemsep]
+ \item If the list of eigenvalues includes 0, then the matrix, $A$, is singular;
+ \item Eigenvalues may have repeated roots (`multiplicities').
+\end{itemize}
+\end{itemize}
+  The characteristic equation takes the form,
+ \begin{equation}\label{eq:characteristic_equation_full_real}
+\det(A - \lambda I) = \prod_{i=1}^k (\lambda - \lambda_i)^{r_i}, \text{ such that }  \begin{cases} k \leq n; \\ \sum_{i=1}^k r_i = n, r_i \in \mathbb{N} \end{cases} . 
+\end{equation}
+\begin{itemize}[noitemsep]
+\item Each eigenvalue can be associated with a single eigenvector, which lies in a 1-dimensional subspace closed under the operation of the matrix, $A$;
+\begin{itemize}
+\item If the eigenvalues are all distinct, then the eigenvectors, $\mathbf{u}_1, \ldots, \mathbf{u}_n$, can be normalized to form a linearly independent set of unit vectors;
+\item If an eigenvalue has multiplicity, $r > 1$, then the eigenvalue is associated with an \\ $r$-dimensional subspace that is independent of eigenvectors associated with any other eigenvalue.  It is always possible to choose an independent basis of the subspace to serve as eigenvectors.
+\item Since the set of eigenvectors associated with different eigenvalues are linearly independent, then from $\S$\ref{sec:non-orthonormal_bases}, there exists a set of bi-orthogonal basis of vectors, $\mathbf{v}_1, \ldots, \mathbf{v}_n$.  
+\end{itemize}
+\item The action of the matrix, $A$, upon \textit{all} eigenvectors can be expressed in terms of the matrix whose column vectors are the eigenvectors, $U$, and a diagonal matrix of eigenvalues, $\Lambda$:
+\begin{equation}\label{eq:eigensystem_full}
+\left.
+\begin{array}{l}
+U = \sum_{i=1}^n \mathbf{u}_i \rangle \langle \mathbf{f}_i \\
+\Lambda = \operatorname{diag}(\lambda_1, \ldots, \lambda_n)
+\end{array}
+\right\}
+\Rightarrow A U = U \Lambda.
+\end{equation}
+\item Since the matrix, $U$ is linearly independent, the inverse can be formed from the bi-orthogonal basis, $V$, whose column vectors are in sequence with the column vectors of $U$, such that $V^\top = U^{-1}$.
+\begin{itemize}[noitemsep]
+\item Multiplying the equation in (\ref{eq:eigensystem_full}) by the transpose yields the \textbf{similarity transformation}: $U^{-1} A U = \Lambda$.  This operation is also known as \textbf{diagonalizing} the matrix, $A$.
+\item From $\S$\ref{sec:change_of_basis} multiplication by the transpose of the bi-orthogonal matrix, $V^\top$, can be interpreted as a change of basis from the natural basis for the space to one aligned with the eigenvectors, $U$. In the natural basis the matrix, $A$, is fully coupled; in the eigenvector basis the action is fully decoupled, and executes pure stretching and compression in the eigenvector directions. For example a linear equation can be simplified in the transformed coordinate system:
+\end{itemize}
+\end{itemize}
+\begin{equation}\label{eq:similarity_transformation}
+A \mathbf{x} = \mathbf{b} \Rightarrow U^\top A U U^{-1} \mathbf{x} = U^{-1} \mathbf{b} \Rightarrow (U^{-1} A U)(U^{-1} \mathbf{x}) = (U^{-1} \mathbf{b}) \Rightarrow \Lambda \mathbf{x}' = \mathbf{b}'.
+\end{equation}
+\begin{itemize}
+\item[] The inverse of a diagonal matrix is another diagonal matrix with inverse values at each position:  $\Lambda^{-1} = \operatorname{diag}(\lambda_1^{-1}, \ldots, \lambda_n^{-1})$, and the solution to (\ref{eq:similarity_transformation}) is
+\end{itemize}
+\begin{equation}\label{eq:solution_bi-orthogonal_basis}
+\mathbf{x}' = \Lambda^{-1} \mathbf{b}' \Rightarrow x'_i = \frac{b'_i}{\lambda_i},
+\end{equation}
+\begin{itemize}
+\item[] which is directly calculated coordinate-by-coordinate in the transformed system.
+\item Finally, since the eigenvectors, $u_1, \ldots, u_n$, are linearly independent, we can associate each with a 1-dimensional subspace, $\mathbb{S}_i$ for which it serves as the basis.  Then the $n$-dimensional vector space is the direct sum of the subspaces,
+\end{itemize}
+\begin{equation}\label{eq:eigenvector_partition}
+\mathbb{R}^n = \mathbb{S}_1 \oplus \cdots \oplus \mathbb{S}_n.
+\end{equation}
+\begin{itemize}
+\item[] The subspaces that share eigenvalue, including the kernel, can be consolidated into subspaces whose dimensionality matches the multiplicity.
+\end{itemize}
+
+\subsection{Eigensystems of Symmetric Matrices (Real Self-adjoint)}\label{sec:eigensystems-self-adjoint}
+Real self-adjoint matrices, $A$, described in $\S$\ref{sec:quadratic-forms}, have real eigenvalues, and are commonly used as models of physical phenomena.  Self-adjoint matrices are symmetric, $A = A^\top$, by the equation in (\ref{eq:self-adjoint_matrix_symmetric}), which implies that the effect of the $i^{th}$ coordinate on the $j^{th}$ coordinate, encoded in the matrix as the entry, $a_{ij}$, is identical to the effect of the $j^{th}$ upon the $i^{th}$, which is encoded in the entry, $a_{ji}$.  This includes a wide class of physically coupled systems, including stress-strain tensors and covariance matrices.
+
+The eigensystems for real self-adjoint matrices is a refinement of properties listed above: by the \textbf{Spectral Theorem} an $n \times n$ real symmetric matrix, $A$, has the following properties
+ \begin{itemize}[noitemsep]
+\item Each eigenvalue can be associated with a single eigenvector, which lies in a 1-dimensional subspace closed under the operation of the matrix, $A$;
+\begin{itemize}[noitemsep]
+\item If the eigenvalues are all distinct, then the eigenvectors, $\mathbf{u}_1, \ldots, \mathbf{u}_n$, can be normalized to form an orthonormal set;
+\item If an eigenvalue has multiplicity, $r > 1$, then the eigenvalue is associated with an \\  $r$-dimensional subspace that is orthogonal to eigenvectors associated with any other eigenvalue.  It is always possible to choose a orthogonal basis of the subspace to serve as eigenvectors.
+\item To show that eigenvectors associated with different eigenvalues must be orthogonal: let eigenvalues, $\lambda$ and $\mu$, be associated with eigenvectors, $\mathbf{u}$ and $\mathbf{v}$, respectively.  Then
+\end{itemize}
+\begin{multline}\label{eq:spectral_eigenvectors}
+\begin{rcases}
+\langle A \mathbf{u}, \mathbf{v} \rangle = \lambda \langle \mathbf{u}, \mathbf{v} \rangle \\
+\langle \mathbf{u}, A \mathbf{v} \rangle = \mu \langle \mathbf{u}, \mathbf{v} \rangle
+\end{rcases}
+\Rightarrow \langle A \mathbf{u}, \mathbf{v} \rangle = \langle \mathbf{u}, A \mathbf{v} \rangle \\
+\Rightarrow \lambda \langle \mathbf{u}, \mathbf{v} \rangle = \mu \langle \mathbf{u}, \mathbf{v} \rangle
+\Rightarrow (\lambda - \mu) \langle \mathbf{u}, \mathbf{v} \rangle = 0
+\Rightarrow \langle \mathbf{u}, \mathbf{v} \rangle = 0.
+\end{multline}
+\item The action of the matrix, $A$, upon \textit{all} eigenvectors can be expressed in terms of the matrix whose column vectors are the eigenvectors, $U$, and a diagonal matrix of eigenvalues, $\Lambda$:
+\end{itemize}
+\begin{equation}\label{eq:eigensystem_full_symmetric}
+\left.
+\begin{array}{l}
+U = \sum_{i=1}^n \mathbf{u}_i \rangle \langle \mathbf{f}_i \\
+\Lambda = \operatorname{diag}(\lambda_1, \ldots, \lambda_n)
+\end{array}
+\right\}
+\Rightarrow A U = U \Lambda.
+\end{equation}
+\begin{itemize}[noitemsep]
+\item Since the matrix, $U$ is orthogonal, the transpose is its inverse, $U^{-1} = U^\top$.  
+\begin{itemize}[noitemsep]
+\item Multiplying the equation in (\ref{eq:eigensystem_full_symmetric}) by the transpose yields the \textbf{similarity transformation}: $U^\top A U = \Lambda$.  This operation is also known as \textbf{diagonalizing} the matrix, $A$.
+\item From $\S$\ref{sec:change_of_basis} multiplication by the transpose of an orthogonal matrix can be interpreted as a change of basis from the natural basis for the space to one aligned with the eigenvectors. In the natural basis the matrix, $A$, is fully coupled; in the eigenvector basis the action is fully decoupled, and executes pure stretching and compression in the eigenvector directions. For example a linear equation can be simplified in the transformed coordinate system:
+\end{itemize}
+\begin{equation}\label{eq:similarity_transformation_symmetric}
+A \mathbf{x} = \mathbf{b} \Rightarrow U^\top A U U^\top \mathbf{x} = U^\top \mathbf{b} \Rightarrow (U^\top A U)(U^\top \mathbf{x}) = (U^\top \mathbf{b}) \Rightarrow \Lambda \mathbf{x}' = \mathbf{b}'.
+\end{equation}
+
+\item[] The inverse of a diagonal matrix is another diagonal matrix with inverse values at each position: $\Lambda^{-1} = \operatorname{diag}(\lambda_1^{-1}, \ldots, \lambda_n^{-1})$, and the solution to (\ref{eq:similarity_transformation}) is
+
+\begin{equation}\label{eq:solution_orthogonal_basis}
+\mathbf{x}' = \Lambda^{-1} \mathbf{b}' \Rightarrow x'_i = \frac{b'_i}{\lambda_i},
+\end{equation}
+
+\item[] which is directly calculated coordinate-by-coordinate in the transformed system.
+
+\item If in addition the matrix, $A$, is positive definite (see (\ref{eq:positive_definite})), then all eigenvalues are positive.  Project an arbitrary vector, $\mathbf{x}$, onto the eigenvectors, $\mathbf{u}_1, \ldots, \mathbf{u}_n$, using the expression in (\ref{eq:basis_coordinates}), so that $a_i = \langle \mathbf{u}_i, \mathbf{x} \rangle$,
+\end{itemize}
+\begin{equation}\label{eq:positive_definite_eigenvalues}
+\left.
+\begin{array}{r}
+\mathbf{x} = \sum_{i=1}^n a_i \mathbf{u}_i \\
+A \mathbf{x} = \sum_{i=1}^n \lambda_i a_i \mathbf{u}
+\end{array}
+\right\}
+\Rightarrow \langle A \mathbf{x}, \mathbf{x} \rangle = \langle \sum_{i=1}^n \lambda_i a_i \mathbf{u}, \sum_{i=1}^n a_i \mathbf{u}_i \rangle = \sum_{i=1}^n \lambda_i a_i^2 .
+\end{equation}
+\begin{itemize}
+\item[] Since $\langle A \mathbf{x}, \mathbf{x} \rangle > 0$ for all $\mathbf{x} \neq \mathbf{0}$, we must have $\lambda_i > 0$ for all $i$.
+\item Finally, since the eigenvectors, $u_1, \ldots, u_n$, are orthogonal, we can associate each with a \\ 1-dimensional subspace, $\mathbb{S}_i$ for which it serves as the basis.  Then the $n$-dimensional vector space is the direct sum of the subspaces,
+\end{itemize}
+\begin{equation}\label{eq:eigenvector_partition_orthogonal}
+\mathbb{R}^n = \mathbb{S}_1 \oplus \cdots \oplus \mathbb{S}_n.
+\end{equation}
+\begin{itemize}
+\item[] The subspaces that share eigenvalues, including the kernel, can be consolidated into subspaces whose dimensionality matches the multiplicity.
+\end{itemize}
+
+\subsection{Generalized Eigensystems of Matrices}\label{sec:eigensystems-generalized}
+The most general form for a diagonalized matrix, as shown above in (\ref{eq:similarity_transformation}) or (\ref{eq:similarity_transformation_symmetric}), is one in \textbf{Jordan normal form}:  all values in the transformed matrix are zero, except for the diagonal, which are the eigenvalues and generalized eigenvalues, and first upper off-diagonal, which are 1 for generalized eigenvalues with multiplicity greater than 1.  Each group, called a \textbf{Jordan block} takes the form
+
+\begin{equation}\label{eq:jordan_block}
+\begin{pmatrix}
+\lambda & 1 & 0 & \cdots & 0 & 0 \\
+0 & \lambda & 1 & \cdots & 0 & 0 \\
+0 & 0 & \lambda & \cdots & 0 & 0 \\
+\vdots & \vdots & \vdots & \ddots & \vdots & \vdots \\
+0 & 0 & 0 & \cdots & \lambda & 1 \\
+0 & 0 & 0 & \cdots & 0 & \lambda 
+\end{pmatrix} .
+\end{equation}
+
+Each $k \times k$ Jordan block is associated with a closed $k$-dimensional subspace: one true eigenvector and $k-1$ \textbf{generalized eigenvectors}, which can be designated $\mathbf{u}_1, \ldots, \mathbf{u}_k$.  The operation of the matrix maps generalized eigenvectors into subsequent generalized eigenvectors in the series, terminating in the one true eigenvector:
+
+\begin{equation}\label{eq:jordan_block_subspace}
+\text{ subspace operations for Jordan block } \Rightarrow 
+\begin{cases}
+(A - \lambda I) \mathbf{u}_1 = \mathbf{u}_2 & \text{ generalized eigenvector } \\
+(A - \lambda I) \mathbf{u}_2 = \mathbf{u}_3 & \text{ generalized eigenvector } \\
+\hspace{45pt} \vdots & \\
+(A - \lambda I) \mathbf{u}_{k-1} = \mathbf{u}_k & \text{ generalized eigenvector } \\
+(A - \lambda I) \mathbf{u}_k = 0 & \text{ true eigenvector }
+\end{cases}
+\end{equation}
+
+\subsection{Eigensystems of Rotation Matrices}\label{sec:eigensystems-rotation}
+A $2 \times 2$ rotation matrix, $R_\theta$, is an antisymmetric matrix,
+
+\begin{equation}\label{eq:rotation_matrix}
+R_\theta = \begin{pmatrix} \cos \theta & -\sin \theta \\ \sin \theta & \cos \theta \end{pmatrix} .
+\end{equation}
+
+It is easy to verify that the rotation matrix is orthonormal, since $R_\theta^\top R_\theta = I$ by trig identities.  The characteristic equation for eigenvalues of the rotation matrix can be expanded to a second-order algebraic equation,
+
+\begin{equation}\label{eq:rotation_matrix_eigenvalues}
+\det(R_\theta - \lambda I) = (\lambda - e^{i \theta})(\lambda - e^{- i \theta}) = 0,
+\end{equation}
+
+whose complex roots have unit magnitude: $|e^{i \theta}| = |e^{-i \theta}| = 1$.
+
+There are no real eigenvectors that satisfy the equation in (\ref{eq:eigensystem_equation}).  Instead, all vectors in the plane are rotated by $\theta$ upon multiplication by $R_\theta$.  For rotation matrices in higher dimensions similar properties hold: the characteristic equation contains roots in complex conjugate pairs, and for each such pair there is a 2-dimensional subspace that is closed under the operation of the matrix.  For rotation matrices in odd dimensions, there must be at least one real eigenvector, and the unpaired eigenvalue must be unity.
+
+Slightly more complicated matrices couple rotation with either expansion or contraction.  The characteristic equations for these matrices have complex-conjugate paired roots of the form,
+
+\begin{equation}\label{eq:spiral_matrix_eigenvalues}
+(\lambda - r e^{i \theta})(\lambda - r e^{-i \theta}),
+\end{equation}
+
+for which, in addition to a rotation in a 2-dimensional subspace by $\theta$, the vectors also expand or contract, depending on whether $r > 1$ or $r < 1$.
+
+Finally, matrices with complex-conjugate eigenvalues cannot be diagonalized!
+
+\subsection{Eigensystems of Arbitrary Square Matrices}\label{sec:eigensystems-arbitrary}
+Finally, the eigensystem of an arbitrary square matrix may consist of any combination of real distinct eigenvalues, repeated eigenvalues, complex-conjugate pairs and Jordan blocks.  The `structure' of a matrix is provided by the orthogonal subspaces, the bases of which are eigenvectors or generalized eigenvectors, that are associated with each group of eigenvalues.  The action of the matrix upon arbitrary vectors is determined by the projection of the vector into each subspace.
+
+\subsection{Eigenvalues and Matrix Trace}\label{sec:eigenvalues_matrix_trace}
+The trace (\textit{cf} $\S$\ref{sec:matrix_trace}) of \textit{diagonalizable} matrices is equal to the sum of the eigenvalues, weighted by multiplicity.  Given a diagonalizable $n$-dimensional square matrix, $A$, we have
+\begin{equation}
+\operatorname{tr}(A) = \operatorname{tr}(U\Lambda U^{-1}) = \operatorname{tr}(\Lambda U U^{-1}) = \operatorname{tr}(\Lambda) = \sum_{i=1}^n \lambda_i.
+\end{equation}
+
+\section{Diagonalization of Non-square Matrices}\label{sec:diagonalization-non-square-matrices}
+Diagonalization of square matrics, described above in $\S\S$\ref{sec:eigensystems-real-eigenvalues} \& \ref{sec:eigensystems-self-adjoint}, relies on the decomposition of matrix actions into a set of mutually independent stretches/contractions in 1-dimensional subspaces.  The decomposition of the matrix that entails diagonalization, as in the similarity transformations described above, can be interpreted as three steps:
+\begin{itemize}[noitemsep]
+\item a change of coordinates from the natural basis to one aligned with the eigenvectors,
+\item stretching/contracting in the direction of the eigenvectors,
+\item a change of coordinates from the eigenvectors back to the original natural basis.
+\end{itemize}
+Since the matrices are square, the change of coordinates map vectors from a domain to a range that share dimension.  For the non-square matrices considered in this section, however, vectors are mapped from a domain to a range that differ in dimension and the program described above must be modified.
+
+\subsection{Singular Value Decomposition}\label{sec:singular-value-decomposition}
+By the \textbf{Singular Value Decomposition Theorem} every $m \times n$ matrix, $A$, can be factored into three simpler matrices:
+
+\begin{equation}\label{eq:singular_value_decomposition}
+A = U \Sigma V^\top \Rightarrow 
+\begin{cases}
+U: & m \times m \text{ orthonormal matrix} \\  
+\Sigma: & m \times n \text{ diagonal matrix} \\
+V: & n \times n \text{ orthonormal matrix} 
+\end{cases} .
+\end{equation}
+
+The values on the diagonal of the matrix, $\Sigma$, are called the \textbf{singular values} of the matrix.  It is customary to order the column vectors of the matrices, $U$ and $V$, so that the singular values are ordered in decreasing magnitude.  If there are $k$ zero-valued singular values, these are sequenced, $\sigma_{\min(m,n)-k+1}, \ldots, \sigma_{n}$.
+
+Given the orthonormal matrices, $U$ and $V$, and the diagonal matrix, $\Sigma$, with $k$ zero-valued singular values, every matrix,$A$, can be described therefore as having the effect of three sequential actions:
+\begin{itemize}[noitemsep]
+\item A change of basis for the $m$-dimensional domain to one aligned with the column vectors of $V$.  Alternatively, this can be described as a rotation executed by the matrix, $V^\top$;
+\item A stretching/contraction along the first $n-k$ basis vectors in the transformed space;
+\begin{itemize}[noitemsep]
+\item If the domain has greater dimension than the range, $m > n$, then the $n-k$ \\ stretched/contracted vectors are embedded in the range;
+\item If the range has greater dimension than the domain, $n > m$, then the stretched/contracted vectors are projected into the first $m-k$ dimensions of the $n$-dimensional range;
+\item If the domain and range share dimension, $m = n$, the matrix is square and the mapping is one-to-one;
+\end{itemize}
+\item A (reverse) change of basis for the $n$-dimensional range from one aligned with the column vectors of $U$ to one aligned with the natural basis.  Alternatively, this can be described as a rotation executed by the matrix, $U$.
+\end{itemize}
+
+Geomtrically, this implies that \textit{all} matrices deform spheres into ellipses.  The locus of unit vectors in the domain, which lie on the surface of an $m$-sphere, are mapped into $n$-dimensional ellipses in the range, deformed along the axes of the ellipse, and rotated.  This deformation is coupled with embedding or projecting into the range, depending on the relative number of zero-valued singular values, and the dimensions of the domain and range.
+
+Finally, the simplest proof of the SVD is constructive, via \textit{QR} decomposition described below in \ref{sec:QR-decomposition}.
+
+
+\subsection{Principal Components Analysis}\label{principal-components-analysis}
+The $m \times n$ matrix, $A$, is frequently a \textbf{data matrix}, in which each row represents a single measurement encoded in $n$ numerical values.  The \textbf{scatter matrix}, $A^\top A$, provides information on the mutual variation of the data columns of $A$.  Substituting the SVD decomposition of $A$, as defined in (\ref{eq:singular_value_decomposition}), into the scatter matrix yields
+
+\begin{equation}\label{eq:principle_components_analysis}
+A^\top A = V \Sigma^\top U^\top U \Sigma V^\top = V \Sigma^\top \Sigma V^\top = V \Sigma_*^2 V^\top.
+\end{equation}
+
+Here, the diagonal matrix, $\Sigma_*^2 = \operatorname{diag}(\sigma_1^2, \ldots, \sigma_n^2)$, and the entries in the $n \times n$ diagonal matrix, $\Sigma_*^2$, are the squares of the singular values of $\Sigma$.
+
+Since the scatter matrix, $A^\top A$, symmetric, real and positive-definite, by the equation in (\ref{eq:positive_definite_eigenvalues}), it can be diagonalized so that the eigenvalues are positive and the eigenvectors can be chosen to form an orthonormal basis.  There is, however, a specialized vocabulary for scatter matrices:
+\begin{itemize}[noitemsep]
+\item The \textbf{principal values} are the eigenvalues of the scatter matrix, $A^\top A$, which are the diagonal elements of the matrix, $\Sigma_*^2$;
+\item The \textbf{principal components} are the eigenvectors associated with the eigenvalues, $V$, which form an orthonormal set.
+\end{itemize}
+
+For cases in which the columns of the data matrix, $A$, have been `demeaned' -- so that all columns are adjusted to sum to zero -- the scatter matrix is the covariance matrix of the data, and the principal components are combinations of data columns that form linearly independent contributions to overall variance in the data.
+
+\section{Block Inverse Matrices}\label{sec:block-inverse}
+A \textbf{block matrix} is one for which the entries are themselves matrices, each of which is shaped so that adjacent matrices share column or row dimensions.  Given the $p \times p$ matrix, $A$, the $p \times q$ matrix, $B$, the $q \times p$ matrix, $C$, and the $q \times q$ matrix, $D$, we can create the $2 \times 2$ block matrix, whose elements two matrix combinations known as \textbf{Schur complements}:
+
+\begin{equation}\label{eq:Schur_complements}
+\begin{pmatrix}
+A & B \\
+C & D
+\end{pmatrix} \Rightarrow \begin{cases} \text{upper Schur complement:} & A - BD^{-1}C \\ \text{lower Schur complement:} & D - CA^{-1}B  \end{cases}
+\end{equation}
+
+The Schur complements are the basis for two block matrix decompositions and inversions that follow below.
+
+\subsection{Upper Schur Complement Block Matrix Inversion}\label{sec:upper-schur}
+We can verify by direct multiplication that the $2 \times 2$ block matrix defined above in (\ref{eq:Schur_complements}) can be decomposed with upper-left entry taking the form of the upper Schur complement:
+
+\begin{equation}\label{eq:block_matrix_decomposition_upper}
+\begin{pmatrix}
+A & B \\
+C & D
+\end{pmatrix} = 
+\begin{pmatrix}
+I_p & BD^{-1} \\
+0 & I_q
+\end{pmatrix}
+\begin{pmatrix}
+A - BD^{-1}C & 0 \\
+0 & D
+\end{pmatrix}
+\begin{pmatrix}
+I_p & 0 \\
+D^{-1}C & I_q
+\end{pmatrix},
+\end{equation}
+
+provided the inverse, $D^{-1}$, exists.  Here, $I_p$ and $I_q$ are the $p \times p$ and $q \times q$ identity matrices, respectively.  By the inverse-product formula in (\ref{eq:matrix_inverse_product}), we can express the inverse of the block matrix as
+
+\begin{align}\label{eq:block_matrix_inverse_upper}
+\begin{pmatrix}
+A & B \\
+C & D
+\end{pmatrix}^{-1} = &
+\begin{pmatrix}
+I_p & 0 \\
+-D^{-1}C & I_q
+\end{pmatrix}
+\begin{pmatrix}
+\left( A - BD^{-1}C \right)^{-1} & 0 \\
+0 & D^{-1}
+\end{pmatrix}
+\begin{pmatrix}
+I_p & -BD^{-1} \\
+0 & I_q
+\end{pmatrix} \notag \\
+= & \begin{pmatrix}
+\left( A - BD^{-1}C \right)^{-1} & -\left( A - BD^{-1}C \right)^{-1} BD^{-1} \\
+-D^{-1}C \left( A - BD^{-1}C \right)^{-1} & D^{-1} + D^{-1}C \left( A - BD^{-1}C \right)^{-1} BD^{-1}
+\end{pmatrix}
+\end{align}
+
+\subsection{Lower Schur Complement Block Matrix Inversion}\label{sec:lower-schur}
+We can verify by direct multiplication that the $2 \times 2$ block matrix defined above in (\ref{eq:Schur_complements}) can be decomposed with lower-right entry taking the form of the lower Schur complement:
+
+\begin{equation}\label{eq:block_matrix_decomposition_lower}
+\begin{pmatrix}
+A & B \\
+C & D
+\end{pmatrix} = 
+\begin{pmatrix}
+I_p & 0 \\
+CA^{-1} & I_q
+\end{pmatrix}
+\begin{pmatrix}
+A & 0 \\
+0 & D - CA^{-1}B
+\end{pmatrix}
+\begin{pmatrix}
+I_p & A^{-1}B \\
+0 & I_q
+\end{pmatrix},
+\end{equation}
+
+provided the inverse, $A^{-1}$, exists.  Here, $I_p$ and $I_q$ are the $p \times p$ and $q \times q$ identity matrices, respectively.  By the inverse-product formula in (\ref{eq:matrix_inverse_product}), we can express the inverse of the block matrix as
+
+\begin{align}\label{eq:block_matrix_inverse_lower}
+\begin{pmatrix}
+A & B \\
+C & D
+\end{pmatrix}^{-1} = &
+\begin{pmatrix}
+I_p & -A^{-1}B \\
+0 & I_q
+\end{pmatrix}
+\begin{pmatrix}
+A^{-1} & 0 \\
+0 & \left( D - CA^{-1}B \right)^{-1}
+\end{pmatrix}
+\begin{pmatrix}
+I_p & 0 \\
+-CA^{-1} & I_q
+\end{pmatrix} \notag \\
+= & \begin{pmatrix}
+A^{-1} + A^{-1}B \left( D - CA^{-1}B \right)^{-1} CA^{-1} & -A^{-1}B \left( D - CA^{-1}B \right)^{-1} \\
+-\left( D - CA^{-1}B \right)^{-1}CA^{-1} & \left( D - CA^{-1}B \right)^{-1}
+\end{pmatrix}.
+\end{align}
+
+\subsection{Woodbury Formula}\label{sec:woodbury-formula}
+The two formulas for block inverse in (\ref{eq:block_matrix_inverse_upper}) and (\ref{eq:block_matrix_inverse_lower}) must be identical: an inverse is unique.  Equating the upper-left entry in each matrix yields the \textbf{Woodbury formula}:
+
+\begin{equation}\label{eq:Woodbury_formul}
+\left(A - BD^{-1}C \right)^{-1} = A^{-1} + A^{-1} B \left( D - CA^{-1}B \right)^{-1} CA^{-1},
+\end{equation}
+
+provided the inverses, $A^{-1}$ and $D^{-1}$, exist.  A similar formula can be written for the lower-right entry in each matrix.  However, this is the same formula with a relabeling of matrices.
+
+\section{Solutions to Linear Equations}\label{solutions-linear-equations}
+Given an $n \times m$ matrix, $A$, and an $m \times 1$ vector, $\mathbf{b}$, the solutions to a linear equation are all $n \times 1$ vectors, $\mathbf{x}$, such that the following holds:
+
+\begin{equation}\label{eq:linear_equation}
+A \mathbf{x} = \mathbf{b}.
+\end{equation}
+
+In particular we are interested in the existence and uniqueness properties of the solutions, which can be stated as:
+\begin{itemize}[noitemsep]
+\item for which vectors, $\mathbf{b}$, does a solution exist?
+\item for which matrices, $A$, are solutions unique?
+\end{itemize}
+
+\subsection{Existence and Uniqueness of Solutions to Linear Equations}\label{sec:existence-uniqueness-linear-equations}
+Recall: Given an $m \times n$ matrix, $A$, then the transpose matrix, $A^\top$, is $n \times m$ and from the equations in (\ref{eq:matrix_transpose_subspaces}) we know that both the domain, $\mathbb{R}^n$, and the range, $\mathbb{R}^m$, can be partitioned into mutually orthogonal subspaces based on the operation of the matrices on the member vectors:
+
+\begin{align}\label{eq:domain_range_LE}
+\text{domain: } & \mathbb{R}^n = \ker(A) \oplus \operatorname{im}(A^\top), \ker(A) \perp \operatorname{im}(A^\top); \\
+\text{range: } & \mathbb{R}^m = \ker(A^\top) \oplus \operatorname{im}(A), \ker(A^\top) \perp \operatorname{im}(A). 
+\end{align}
+
+The \textbf{Fredholm Alternative}:
+\begin{itemize}[noitemsep]
+\item Either $\mathbf{b} \in \operatorname{im}(A)$, in which case there is at least one solution to the equation;
+\item Or $\mathbf{b} \notin \operatorname{im}(A)$, in which case there is at least one vector, $\mathbf{y} \in \ker (A^\top)$, such that $\langle \mathbf{y}, \mathbf{b} \rangle = 0$, and there is no solution to the equation.
+\end{itemize}
+If we further add the restriction that the domain and range share dimension, $m = n$, then
+\begin{itemize}[noitemsep]
+\item If $\operatorname{rank}(A) = n$, which implies that $\ker(A) = {\mathbf{0}}$, then for each vector, $\mathbf{b}$, there is a \textit{unique} solution, $\mathbf{x}$;
+\begin{itemize}[noitemsep]
+\item The matrix, $A$, is non-singular and here exists a unique inverse matrix, $A^{-1}$, such that $\mathbf{x} = A^{-1} \mathbf{b}$ .
+\item Proof of uniqueness by contradiction
+\end{itemize} 
+\end{itemize}
+\begin{equation}\label{eq:LE_unique_solution}
+\begin{rcases}
+A \mathbf{x}_1 = \mathbf{b} \\
+A \mathbf{x}_2 = \mathbf{b}
+\end{rcases}
+\Rightarrow A(\mathbf{x}_1 - \mathbf{x}_2) = 0 \Rightarrow \ker(A) \neq \{\mathbf{0}\} .
+\end{equation}
+\begin{itemize}
+\item If $\operatorname{rank}(A) < n$, then $\ker(A) \neq \{\mathbf{0}\}$ and $A$ is singular
+\begin{itemize}
+\item If one solution exists, then infinitely many exist: if $\mathbf{x}^*$ is a solution, then so is $\mathbf{x}^* + \mathbf{y}$, for all $\mathbf{y} \in \ker(A)$, since $A\mathbf{y} = 0$.
+\end{itemize}
+\end{itemize}
+
+\subsection{Computational Issues for Solutions to Linear Equations}\label{sec:computational-issues-linear-equations}
+The conditions for existence and uniqueness to linear equations, $A\mathbf{x}=\mathbf{b}$, are provided in the previous section, $\S$\ref{sec:existence-uniqueness-linear-equations}.  These conditions require absolute precision for the entries in both the matrix, $A$, and the target vector, $\mathbf{b}$, for which existence and uniqueness are binary properties: either solutions exist or they do not; either solutions are unique or they are not.  In modeling applications, however, the entries in both quantities are estimates with finite precision, and it is desireable to understand how `close' -- in the sense of metrics introduced in $\S$\ref{sec:norms} -- a solution is to the space of singular problems.
+
+In particular we are interested in the \textbf{sensitivity} of the solution, measuring the degree to which
+\begin{itemize}[noitemsep]
+\item small perturbations in the target vector, $\mathbf{b} + \delta \mathbf{b}$, and/or
+\item small perturbations in the matrix, expressed as $A + \delta A$,
+\end{itemize}
+ lead to large errors in the result, $\mathbf{x} + \delta \mathbf{x}$.  In both cases the relative error in the perturbation to the solution, $\delta \mathbf{x}$, is bounded by the \textbf{matrix condition number},
+
+\begin{equation}\label{eq:matrix_condition_number}
+\kappa(A) = |A| |A|^{-1} \Rightarrow 
+\begin{cases}
+\frac{|\delta \mathbf{x}|}{|\mathbf{x}|} \leq |A| |A|^{-1}  \frac{|\delta \mathbf{b}|}{|\mathbf{b}|} \\
+\frac{|\delta \mathbf{x}|}{|\mathbf{x}|} \leq |A| |A|^{-1}  \frac{|\delta A}{|A|}
+\end{cases}
+\end{equation}
+
+The derivations of these relation are straightforward applications of compatible matrix norms described in $\S$\ref{sec:matrix-norms}:
+\begin{align}\label{eq:target_vector_norms}
+&\textbf{unperturbed problem: } A \mathbf{x} = \mathbf{b} \Rightarrow |\mathbf{b}| = |A \mathbf{x}| \leq |A| |\mathbf{x}| \\
+\label{eq:perturbed_target}
+&\textbf{perturbed target: } A \left( \mathbf{x} + \delta \mathbf{x} \right) = \left( \mathbf{b} + \delta \mathbf{b} \right) \Rightarrow \delta \mathbf{x} = A^{-1} \delta \mathbf{b} \Rightarrow |\delta \mathbf{x} | = |A^{-1} \delta \mathbf{b}| \leq |A^{-1}||\delta \mathbf{b}|
+\end{align}
+
+\begin{itemize}
+\item Taking the ratio of both sides of the inequalities in the expressions in (\ref{eq:target_vector_norms}) \& (\ref{eq:perturbed_target}) yields the sensitivity of the solution to small changes in target vector:
+
+\begin{equation}\label{eq:target_sensitivity}
+\frac{|\delta \mathbf{x}|}{|A||\mathbf{x}|} \leq \frac{|A^{-1}|\delta \mathbf{b}|}{| \mathbf{b}|} \Rightarrow \frac{|\delta \mathbf{x}|}{|\mathbf{x}|} \leq |A||A^{-1}| \frac{|\delta \mathbf{b}|}{|\mathbf{b}|} \equiv \kappa(A) \frac{|\delta \mathbf{b}|}{|\mathbf{b}|};
+\end{equation}
+
+\begin{multline}\label{eq:perturbed_matrix}
+\textbf{perturbed matrix:} \left( A + \delta A \right) \left( \mathbf{x} + \delta \mathbf{x} \right) = \mathbf{b} \Rightarrow \delta \mathbf{x} = -A^{-1} \delta A \left( \mathbf{x} + \delta \mathbf{x} \right)  \\
+\Rightarrow |\delta \mathbf{x} | = |-A^{-1} \delta A \left( \mathbf{x} + \delta \mathbf{x} \right) | \Rightarrow |\delta \mathbf{x}| \leq |A^{-1}||\delta A||\mathbf{x} + \delta \mathbf{x} |
+\end{multline}
+
+\item Rearranging the expression in (\ref{eq:perturbed_matrix}) yields the sensitivity of the solution to small changes in the matrix operator:
+\end{itemize}
+\begin{equation}\label{eq:matrix_sensitivity}
+\frac{|\delta \mathbf{x} |}{|\mathbf{x} + \delta \mathbf{x}|} \leq |A||A^{-1}| \frac{|\delta A|}{|A|} \equiv \kappa(A) \frac{|\delta A|}{|A|}.
+\end{equation}
+
+Condition numbers are easily calculated using the vector and induced matrix 2-norms, shown above in $\S$\ref{sec:vector-norms} and $\S$\ref{sec:matrix-norms}.  In particular for positive-definite matrices, which by the Spectral Theorem in $\S$\ref{sec:eigensystems-self-adjoint}, has a full set of real, positive eigenvalues, $(\lambda_{\min}, \ldots, \lambda_{\max})$ the \textbf{Rayleigh-Ritz Theorem} states that
+
+\begin{equation}\label{eq:Rayleigh-Ritz_theorem}
+0 < \lambda_{\min} \leq \langle A \mathbf{x}, \mathbf{x} \rangle \leq \lambda_{\max}.
+\end{equation}
+
+It immediately follows that
+
+\begin{equation}\label{eq:condition_number_2norm}
+\begin{rcases}
+||A||_2 = \lambda_{\max} \\
+||A^{-1}||_2 = \lambda_{\min}^{-1}
+\end{rcases}
+\Rightarrow \kappa_2(A) = \frac{\lambda_{\max}}{\lambda_{\min}} .
+\end{equation}
+
+Note that $\kappa(A) \geq 1$ for all matrices, $A$, and equality holds only for the identity matrix.
+
+Finally, an \textbf{ill-conditioned matrix} is one for which the condition number approaches machine precision.  As a general rule of thumb, there is a loss of approximately $\log_{10}(\kappa)$ digits of precision due to computational sensitivity.
+
+\section{Matrix Decompositions}\label{sec:matix-decomposition}
+A matrix, $L$, is said to be in \textbf{lower triangular form} if every entry above the diagonal is zero, $l_{ij} = 0, j > i$, and a matrix, $U$, is said to be in \textbf{upper triangular form} if every entry below the diagonal is zero, $u_{ij}= 0, j < i$.
+
+\subsection{Elementary Matrix Operations}\label{sec:elementary-matrix-operations}
+Complex ends targeted by matrix calculations are usually achieved by a sequence of simpler, \textbf{elementary matrix operations}, which are multiplications by rank-1 or rank-2 matrices with specific objectives for the target matrix entries.  Usually the objective is zero out a specific entry, or rearrange rows or columns to ensure sufficient precision in a subsequent calculation.
+
+\subsubsection{Gaussian Elimination}\label{sec:gaussian-elimination}
+There are three elementary calculations made in Gaussian elimination (with partial pivots):
+\begin{itemize}[noitemsep]
+\item Swapping one row for another;
+\item Multiplying one row by a constant value;
+\item Adding the multiple of one row to another.
+\end{itemize}
+If, in addition, one swaps one column for another, then we have Gaussian elimination with complete pivots. 
+
+The objective for Gaussian elimination is usually to construct directly the inverse of a matrix to solve a linear equation. The basic procedure is to convert the matrix to an upper triangular form by progressively eliminating entries below subsequent diagonals, then convert the upper triangular matrix to diagonal through back-substitution.  At each step of the first stage rows may be interchanged to ensure the largest value is next, which helps for purposes of numerical stability.
+\begin{itemize}
+\item The sequence of operations requires approximately $\frac{2}{3} n^3$ flops.
+\end{itemize}
+
+\subsubsection{Householder Reflection}\label{sec:householder-reflection}
+Given an arbitrary vector, $\mathbf{u}$, a \textbf{Householder reflection} is one for which projections of target vectors are `reversed' in the complementary subspace, $\mathbf{u}^\perp$.  The form of the rank-1 Householder matrix,
+
+\begin{equation}\label{eq:Householder_reflection}
+H = I - 2 \mathbf{u} \left( \mathbf{u}^\top \mathbf{u} \right)^\top \mathbf{u}^\top ,
+\end{equation}
+
+is quite similar to the complementary projection operator in (\ref{eq:complementary_projection}).  Indeed, given the projection matrix, $P = \mathbf{u} \left( \mathbf{u}^\top \mathbf{u} \right)^\top \mathbf{u}^\top$, the Householder reflection matrix is expressed as $H = I - 2P$.  The interpretation is clear: the complementary projection matrix, $P^\perp = I - P$, projects a vector into the complementary subspace; the Householder reflection matrix pushes the vector an equal amount into the other side of the complementary subspace.
+
+Usually, the computational objection for a Householder reflection is zero out a dimension by reflecting a target vector, $\mathbf{x}$, into an axis, say, $\mathbf{e}_i$.  The Householder matrix based on the vector, $\mathbf{u} = ||\mathbf{x}||_2 \mathbf{e}_i$, achieves this goal.
+
+\subsubsection{Givens rotation}\label{sec:givens-rotation}
+A \textbf{Givens rotation} is simply a $2 \times 2$ rotation matrix, as in (\ref{eq:rotation_matrix}), embedded in a higher dimensional space:
+
+\begin{equation}\label{eq:givens_rotation}
+\begin{pmatrix}
+1 & \cdots & 0 & \cdots & 0 & \cdots & 0 \\
+\vdots & \ddots & \vdots & \vdots & \vdots & \vdots & \vdots \\
+0 & \cdots & \cos(\theta) & \cdots & -\sin(\theta) & \cdots & 0 \\
+\vdots & \vdots & \vdots & \ddots & \vdots & \vdots & \vdots \\
+0 & \cdots & \sin(\theta) & \cdots & \cos(\theta) & \cdots & 0 \\
+\vdots & \vdots & \vdots & \vdots & \vdots & \ddots & \vdots \\
+0 & \cdots & 0 & \cdots & 0 & \cdots & 1 ,
+\end{pmatrix}
+\end{equation}
+
+in which the rotation occurs in the 2-dimensional subspace, $\operatorname{span}(\mathbf{e}_i, \mathbf{e}_j)$.  Usually the objective is to rotate a vector into the complementary subspace, $\operatorname{span}(\mathbf{e}_i, \mathbf{e}_j)^\perp$.
+
+\subsection{Various Matrix Decompositions}\label{sec:various-matrix-decompositions}
+A few diagonalized matrix decompositions have been already introduced: similarity transformations of square matrices in $\S\S$\ref{sec:eigensystems-real-eigenvalues} \& \ref{sec:eigensystems-self-adjoint}, and the Singular Value Decomposition in $\S$\ref{sec:singular-value-decomposition}.
+\subsubsection{\textit{LU} Decomposition (Square Matrices in Triangular Form)}\label{sec:LU-decomposition}
+Every \textit{square} matrix, $A$, can be decomposed into the product of two matrices, 
+
+\begin{equation}\label{eq:LU_decomposition}
+A = LU \Rightarrow \begin{cases} L & \text{ lower triangular form} \\ U & \text{ upper triangular form}   \end{cases} .
+\end{equation}
+
+The decomposition can be carried out by Gaussian elimination with partial or complete pivot.
+\begin{itemize}
+\item \textit{LU} decomposition using Gaussian elimination with partial pivots requires $\frac{2}{3} n^3$ flops.
+\end{itemize}
+
+\subsubsection{Cholesky Decomposition (Symmetric Positive-Definite Matrices)}\label{sec:cholesky-decomposition}
+For symmetric positive-definite matrices the upper triangular matrix, $U$, in the previous section, $\S$\ref{sec:LU-decomposition}, can be expressed as the transpose of the lower triangular matrix, so that $A = LL^\top$.
+\begin{itemize}
+\item Cholesky decomposition using a kind of symmetric \textit{LU} decomposition requires $\frac{1}{3} n^3$ flops.
+\end{itemize}
+
+\subsubsection{\textit{QR} Decomposition (Arbitrary Matrices)}\label{sec:QR-decomposition}
+Any \textit{arbitrary} $m \times n$ matrix, $A$, can be decomposed into the product of two matrices
+
+\begin{equation}\label{eq:QR_decomposition}
+A = QR \Rightarrow 
+\begin{cases}
+Q & m \times m \text{ orthogonal matrix} \\ 
+R & m \times n \text{ upper triangular form}   
+\end{cases} .
+\end{equation}
+
+The construction can be achieved by
+\begin{itemize}
+\item Householder reflections using $2mn^2 - \frac{2}{3}n^3$ flops
+\item Givens rotations using $3mn^2 - n^3$ flops
+\end{itemize}
+
+%\vspace{1.5cm}
+%\noindent \textbf{Acknowledgments}
+
+%\bibliographystyle{plainnat}
+%\bibliography{references}
+
+\end{document}
